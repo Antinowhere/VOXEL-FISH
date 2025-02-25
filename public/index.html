@@ -1,0 +1,2931 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Underwater Voxel World</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .controls-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            display: none;
+        }
+
+        .title-card {
+            position: fixed;
+            bottom: 20px;
+            /* Changed from top to bottom */
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Arial', sans-serif;
+            z-index: 1000;
+            text-align: right;
+        }
+
+        .title-card h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+
+        .title-card p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            opacity: 0.8;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .view-toggle,
+        .vibe-button {
+            position: static;
+            /* Override any absolute positioning */
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .view-toggle:hover,
+        .vibe-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.05);
+        }
+
+        @keyframes flashBounce {
+
+            0%,
+            100% {
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                transform: translateY(0) scale(1);
+            }
+
+            25% {
+                background: rgba(255, 255, 255, 0.9);
+                color: black;
+                transform: translateY(-5px) scale(1.1);
+            }
+
+            50% {
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                transform: translateY(0) scale(1);
+            }
+
+            75% {
+                background: rgba(255, 255, 255, 0.9);
+                color: black;
+                transform: translateY(-5px) scale(1.1);
+            }
+        }
+
+        .vibe-button {
+            background: rgba(138, 43, 226, 0.7);
+        }
+
+        .vibe-button:hover {
+            background: rgba(138, 43, 226, 0.9);
+        }
+
+        .vibe-button.playing {
+            animation: pulse 2s infinite;
+            background: rgba(255, 20, 147, 0.7);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+                background: rgba(255, 20, 147, 0.9);
+            }
+        }
+
+        @keyframes inactivityFlash {
+
+            0%,
+            100% {
+                background: rgba(0, 0, 0, 0.7);
+                transform: scale(1);
+            }
+
+            50% {
+                background: rgba(0, 0, 0, 0.9);
+                transform: scale(1.05);
+            }
+        }
+
+        /* Replace the old gentleFlash animation with this new one */
+        @keyframes gentleFlash {
+
+            0%,
+            100% {
+                background: rgba(0, 0, 0, 0.7);
+                transform: scale(1);
+            }
+
+            50% {
+                background: rgba(0, 0, 0, 0.9);
+                transform: scale(1.05);
+            }
+        }
+
+        .mode-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            justify-content: center;
+            /* Center the buttons horizontally */
+        }
+
+        .demon-button {
+            padding: 10px 20px;
+            background: rgba(139, 0, 0, 0.7);
+            color: #ff3333;
+            border: 2px solid #ff0000;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Arial Black', sans-serif;
+            text-shadow: 0 0 5px #ff0000;
+            animation: pulse 2s infinite;
+        }
+
+        .demon-button:hover {
+            background: rgba(220, 20, 60, 0.9);
+            text-shadow: 0 0 10px #ff0000;
+            box-shadow: 0 0 15px #ff0000;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes glitch {
+            0% {
+                transform: translate(0);
+            }
+
+            20% {
+                transform: translate(-5px, 5px);
+            }
+
+            40% {
+                transform: translate(5px, -5px);
+            }
+
+            60% {
+                transform: translate(-5px, -5px);
+            }
+
+            80% {
+                transform: translate(5px, 5px);
+            }
+
+            100% {
+                transform: translate(0);
+            }
+        }
+
+        @keyframes chaotic-movement {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(50px, -30px) rotate(180deg);
+            }
+
+            50% {
+                transform: translate(-30px, 50px) rotate(-90deg);
+            }
+
+            75% {
+                transform: translate(20px, 20px) rotate(270deg);
+            }
+
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        .controls-panel {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+            display: none;
+            /* Hide by default */
+        }
+
+        .controls-panel h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        .controls-panel ul {
+            margin: 0;
+            padding-left: 20px;
+            list-style-type: none;
+        }
+
+        .controls-panel li {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .key {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-right: 8px;
+            font-family: monospace;
+        }
+
+        .view-toggle,
+        .real2d-toggle {
+            position: static;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+        }
+
+        .view-toggle:hover,
+        .real2d-toggle:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .real2d-toggle {
+            display: none;
+        }
+
+        .pixilate-button {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+        }
+
+        .pixilate-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Pixel art rendering style */
+        canvas.pixelated {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .controls-display {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+            display: none;
+        }
+
+        .controls-display h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .controls-display ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .controls-display li {
+            margin: 5px 0;
+        }
+
+        .pixilate-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Pixel Art Scene Styles */
+        .pixel-scene {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #003366 0%, #0066cc 100%);
+            image-rendering: pixelated;
+            overflow: hidden;
+        }
+
+        .pixel-fish {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAGUSURBVFiF7ZY9TsNAEIXfbCAFBT/iKDkCHSkFoqbhGhyAI3AGGiQ6rgAVoqKkoKQApIQQkWyPi7UVObEdx94NTcQnjbQ7O2/e7ng8awAjAFMAKwAbABmATFt+1wBmACb6LRYPAKYAKgAPAHb0kAHIKUwO4BHAFMAdPbkDsNTJKYAhgAGAGwDXAAYUYqDf8nsI4Jb9BgCeALwBWADYuqYHwFAH5QAWAEYAxgBu1JhrAKMAYwCvAOYAlgA+XdNnAF4ATAA8AnjWyQsAHzr5AsC7CvCt47cAPgB8qQALAO8A1ipQ7hJgAuBZZ7zQGS90xnMAr2rKpQqwVAFmKsCThs5KBfhwCTAG8KQzXuiMFzrjOYBXNeVSBViqADMV4ElDZ6UCbFwCjAE86YwXOuOFzngO4FVNuVQBlirATAV40tBZqQBblwBjAE864zNt+Z0DeNXQWaoASxVgRgHGGjprFWDnEmAM4Eln/B+2/P4nAaQQQgghhBBCCCGEEEIIIYQQQgghhBBCiO78AGkZj6fvZF+WAAAAAElFTkSuQmCC');
+            transform-origin: center;
+            transition: transform 0.3s;
+            z-index: 100;
+            filter: drop-shadow(0 0 5px rgba(255, 136, 0, 0.5));
+        }
+
+        .pixel-shark {
+            position: absolute;
+            width: 64px;
+            height: 32px;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAcCAYAAADRJz7xAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHESURBVFiF7Ze/ThtBEMZ/s2eQeAIkQEiRKBCiQAIJCR4A8QC8AC/AC/ACeQEeICVNJCSQKBBFhISEhGQjgXzns2c+il3fxTi+89pn30n+pNVpd2e+b3Zn9s4wQQk4AVLA6mPpZ0n7jIUScApcAXf6W33PAEv/XwEn2ndkHAHnQAtoAwN9t4EW0NaxR0CpqAQOgSugA/SAvr57QEfHHgKVvBJYA86ANnAP9PU90Pd7HTvTPiOjDJwB18AjMAQe9T3UvmvgVPuOhApwDtwAT8AI6Op7pO834Fz7jYQqcAF0gR4w0ncP6GrfC+07EhaBSyAFHoAxMNb3WPtSHbOYVwKrwBXQAYbASN8jfXeAK+07MhaAM+AaeAJGQFffI327wJn2HQlV4By4AR6AAdDX90DfN8C59h0Ji8Al0NZEPwJDfQ/13QYutW8u1IAGkAF3wD0w0Pedvhs6tpZXAgvAMdACusAj8KjvR+27BRzr2JFQBk6AFGjr7A+Bvr7bQKpjT4ByUQkcAOdAE7gFuvpu6vsWOAcOikpgGTgGmkADuAVu9d3QvibwDSgXlUAVOARO9FkBVvRZ0b4n+qwWlcA88A34CPwEfunzU/u+A+aLSuAvZpj5dyVVr3YAAAAASUVORK5CYII=');
+            transform-origin: center;
+            z-index: 90;
+            filter: drop-shadow(0 0 5px rgba(68, 102, 170, 0.5));
+            animation: swim 15s linear infinite;
+        }
+
+        .pixel-small-fish {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAB5SURBVDiN7ZOxDYAgEEXfGYZwBEdwFEZxBEdwBEbQkk4KE2MBnKWJ8pKj4L7/7x0HE0bgAhLwAhnIQNLKDFzAuSq0A8fHwgU4RmBfWVgAKALbm0KfD/RU0P0XelSYDYwt0KqQW6B2SPMhzW1c22a1jWp7ZYbZeAGyViwl0iHvHwAAAABJRU5ErkJggg==');
+            transform-origin: center;
+            z-index: 80;
+            filter: drop-shadow(0 0 3px rgba(85, 255, 170, 0.5));
+            animation: swim-small 10s linear infinite;
+        }
+
+        .pixel-seaweed {
+            position: absolute;
+            bottom: 0;
+            width: 16px;
+            height: 48px;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAwCAYAAAAYX/pXAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABxSURBVEiJ7ZTBCYAwDEUfOoAjOIIjOJqjOIIjOEJH8NCDINhqk9YK+SCEHL7/J4TABxnYgQtoQAOyVhpwAvsQYQF2YP0jLECJEeZ+0PUFvX/QFaH7hO4rTB2YIkwdmL6F6TGlx7Q2prWVa4eUgekBF0tCJQkDUk4AAAAASUVORK5CYII=');
+            animation: sway 2s ease-in-out infinite;
+            z-index: 70;
+            filter: drop-shadow(0 0 3px rgba(51, 170, 51, 0.5));
+        }
+
+        .pixel-coral {
+            position: absolute;
+            bottom: 0;
+            width: 24px;
+            height: 32px;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAgCAYAAAAIXrg4AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAB+SURBVEiJ7ZTBDYAgDEUfxgEcwREcxVEcwREcwRFsOXhQE6GUthbixZeQkPL6/7cJ8GEAZmADCrABszYKsADDE2EEFmD6IoxAihHO50HzF3r+QVOEf0/ovsLjgCfC44AnwuOA51t4PKbHY1qNaW3l2iF5YHqAhEhCJAkRyQkcgFgsRwS8zQAAAABJRU5ErkJggg==');
+            z-index: 60;
+            filter: drop-shadow(0 0 3px rgba(255, 102, 102, 0.5));
+        }
+
+        .pixel-ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background-color: #997755;
+            z-index: 50;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes sway {
+
+            0%,
+            100% {
+                transform: rotate(-5deg);
+            }
+
+            50% {
+                transform: rotate(5deg);
+            }
+        }
+
+        @keyframes swim {
+            0% {
+                transform: translateX(-100%) scaleX(1);
+            }
+
+            49% {
+                transform: translateX(100%) scaleX(1);
+            }
+
+            50% {
+                transform: translateX(100%) scaleX(-1);
+            }
+
+            99% {
+                transform: translateX(-100%) scaleX(-1);
+            }
+
+            100% {
+                transform: translateX(-100%) scaleX(1);
+            }
+        }
+
+        @keyframes swim-small {
+            0% {
+                transform: translate(-100%, 0) scaleX(1);
+            }
+
+            25% {
+                transform: translate(100%, -50px) scaleX(1);
+            }
+
+            50% {
+                transform: translate(-100%, -100px) scaleX(-1);
+            }
+
+            75% {
+                transform: translate(100%, -50px) scaleX(1);
+            }
+
+            100% {
+                transform: translate(-100%, 0) scaleX(1);
+            }
+        }
+
+        @keyframes circle-swim {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg) translateX(150px) rotate(0deg) scaleX(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) rotate(180deg) translateX(150px) rotate(-180deg) scaleX(-1);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg) translateX(150px) rotate(-360deg) scaleX(1);
+            }
+        }
+
+        @keyframes figure-eight {
+            0% {
+                transform: translate(0, 0) scaleX(1);
+            }
+
+            25% {
+                transform: translate(100px, -50px) scaleX(1);
+            }
+
+            50% {
+                transform: translate(0, -100px) scaleX(-1);
+            }
+
+            75% {
+                transform: translate(-100px, -50px) scaleX(-1);
+            }
+
+            100% {
+                transform: translate(0, 0) scaleX(1);
+            }
+        }
+
+        .school-fish {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAB5SURBVDiN7ZOxDYAgEEXfGYZwBEdwFEZxBEdwBEbQkk4KE2MBnKWJ8pKj4L7/7x0HE0bgAhLwAhnIQNLKDFzAuSq0A8fHwgU4RmBfWVgAKALbm0KfD/RU0P0XelSYDYwt0KqQW6B2SPMhzW1c22a1jWp7ZYbZeAGyViwl0iHvHwAAAABJRU5ErkJggg==');
+            transform-origin: center;
+            z-index: 85;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 170, 0.5));
+            animation: circle-swim 20s linear infinite;
+        }
+
+        .jellyfish {
+            position: absolute;
+            width: 24px;
+            height: 32px;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAgCAYAAAAIXrg4AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAB+SURBVEiJ7ZTBDYAgDEUfxgEcwREcxVEcwREcwRFsOXhQE6GUthbixZeQkPL6/7cJ8GEAZmADCrABszYKsADDE2EEFmD6IoxAihHO50HzF3r+QVOEf0/ovsLjgCfC44AnwuOA51t4PKbHY1qNaW3l2iF5YHqAhEhCJAkRyQkcgFgsRwS8zQAAAABJRU5ErkJggg==');
+            z-index: 75;
+            filter: drop-shadow(0 0 3px rgba(255, 192, 203, 0.6));
+            animation: float 8s ease-in-out infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) scaleY(1);
+            }
+
+            50% {
+                transform: translateY(-30px) scaleY(1.1);
+            }
+        }
+
+        .school-container {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            pointer-events: none;
+            animation: move-school 30s linear infinite;
+        }
+
+        @keyframes move-school {
+            0% {
+                transform: translate(-100%, 20%) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(0%, 40%) rotate(45deg);
+            }
+
+            50% {
+                transform: translate(100%, 60%) rotate(0deg);
+            }
+
+            75% {
+                transform: translate(0%, 40%) rotate(-45deg);
+            }
+
+            100% {
+                transform: translate(-100%, 20%) rotate(0deg);
+            }
+        }
+
+        /* Loading Screen Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #001020 0%, #002244 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .loading-content {
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+            min-height: 500px;
+            /* Reserve consistent vertical space */
+        }
+
+        .loading-title {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(102, 255, 255, 0.3);
+            animation: glow 2s ease-in-out infinite;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .loading-message {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #66ffff;
+            text-shadow: 0 0 5px rgba(102, 255, 255, 0.2);
+            min-height: 27px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-bar-container {
+            width: 300px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #66ffff, #0088ff);
+            border-radius: 10px;
+            transition: width 0.3s ease-out;
+            box-shadow: 0 0 10px rgba(102, 255, 255, 0.3);
+            opacity: 0.8;
+        }
+
+        .loading-credits {
+            margin: 20px 0;
+            font-size: 14px;
+            opacity: 0.7;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .initialize-button-container {
+            height: 60px;
+            /* Reserve space for button */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .initialize-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: rgba(102, 255, 255, 0.15);
+            border: 2px solid rgba(102, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+            text-shadow: 0 0 5px rgba(102, 255, 255, 0.3);
+            opacity: 0;
+        }
+
+        .initialize-button:hover {
+            background: rgba(102, 255, 255, 0.25);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(102, 255, 255, 0.4);
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                text-shadow: 0 0 10px rgba(102, 255, 255, 0.3);
+            }
+
+            50% {
+                text-shadow: 0 0 20px rgba(102, 255, 255, 0.5);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading-overlay">
+        <div class="loading-content">
+            <h1 class="loading-title">UNDERWATER VOXEL</h1>
+            <div class="loading-message">Initializing aquatic experience...</div>
+            <div class="loading-bar-container">
+                <div class="loading-bar"></div>
+            </div>
+            <div class="loading-credits">
+                <p>Created by Liam Mason</p>
+                <p>Built with Three.js</p>
+                <p>© 2025 All Rights Reserved</p>
+            </div>
+            <button class="initialize-button">Initialize Experience</button>
+        </div>
+    </div>
+
+    <div class="title-card">
+        <h1>Fish - 3JS</h1>
+        <p>an app by Liam Mason © 2025</p>
+    </div>
+
+    <div class="mode-buttons">
+        <button class="view-toggle">Switch to Third Person</button>
+        <button class="vibe-button">Start Vibing</button>
+    </div>
+
+    <div class="controls-panel">
+        <h3>Controls</h3>
+        <ul>
+            <li><span class="key">W</span>Move Forward</li>
+            <li><span class="key">S</span>Move Backward</li>
+            <li><span class="key">A</span>Move Left</li>
+            <li><span class="key">D</span>Move Right</li>
+            <li><span class="key">Q</span>Move Up</li>
+            <li><span class="key">E</span>Move Down</li>
+            <li><span class="key">Mouse</span>Look Around</li>
+            <li><span class="key">ESC</span>Toggle Mouse Lock</li>
+        </ul>
+        <p><i>the fish moves sideways. you'll have to live with it.</i></p>
+
+    </div>
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        // Loading Screen Logic
+        const loadingBar = document.querySelector('.loading-bar');
+        const initializeButton = document.querySelector('.initialize-button');
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        const loadingMessage = document.querySelector('.loading-message');
+
+        const loadingStages = [
+            { progress: 0, message: "Initializing aquatic experience..." },
+            { progress: 15, message: "Gathering the fish..." },
+            { progress: 30, message: "Voxeling environment..." },
+            { progress: 45, message: "Teaching sharks to be menacing..." },
+            { progress: 60, message: "Generating underwater currents..." },
+            { progress: 75, message: "Applying fish physics..." },
+            { progress: 85, message: "Making bubbles bubbly..." },
+            { progress: 95, message: "Almost there..." },
+            { progress: 100, message: "Ready to dive!" }
+        ];
+
+        let currentStage = 0;
+        let progress = 0;
+
+        const loadingInterval = setInterval(() => {
+            progress += 1;
+
+            // Check if we've reached a new stage
+            if (currentStage < loadingStages.length && progress >= loadingStages[currentStage].progress) {
+                loadingMessage.style.opacity = 0;
+                setTimeout(() => {
+                    loadingMessage.textContent = loadingStages[currentStage].message;
+                    loadingMessage.style.opacity = 0.7;
+                }, 300);
+                currentStage++;
+            }
+
+            // Update loading bar with easing
+            loadingBar.style.width = `${progress}%`;
+
+            if (progress >= 100) {
+                clearInterval(loadingInterval);
+                setTimeout(() => {
+                    initializeButton.style.display = 'block';
+                    // Fade in the button
+                    setTimeout(() => {
+                        initializeButton.style.opacity = '1';
+                    }, 50);
+                }, 500);
+            }
+        }, 70); // 7000ms / 100 steps = 70ms per step
+
+        // Initialize button click handler with fade out
+        initializeButton.addEventListener('click', () => {
+            loadingOverlay.style.opacity = '0';
+            loadingOverlay.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 500);
+
+            // Play initial bubble sound
+            playBubbleSound();
+            lastBubbleTime = Date.now();
+
+            // Start the underwater ambience
+            underwaterAmbience.play().catch(error => {
+                console.log("Audio playback failed:", error);
+            });
+        });
+
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        let composer;
+
+        // Game objects
+        let goldfish;
+        const sharks = [];
+        const smallFish = [];
+        const bubbles = [];
+        const seaweed = [];
+        const anglerFish = [];  // Add this line
+
+        // Constants
+        const COLORS = {
+            water: 0x0066ff,
+            goldfish: 0xff8800,
+            shark: 0x4466aa,
+            smallFish: [0x55ffaa, 0xff66ff, 0xffff66],
+            coral: [0xff6666, 0xff99cc, 0xffcc66, 0x66ffcc],
+            glowingCoral: [0xff3333, 0xff66ff, 0x66ffff],
+            glowingFish: [0x00ffff, 0xff66ff, 0xffff00],
+            bubble: 0x66ffff,
+            sand: 0xffcc44,
+            eye: 0x000000,
+            eyeShine: 0xffffff,
+            seaweed: [0x33aa33, 0x227722, 0x55cc55],
+            sharkEye: 0xff0000,
+            sharkTeeth: 0xffffff,
+            rocks: [0x555555, 0x666666, 0x777777, 0x444444],  // Rock colors
+            crab: 0xff4444  // Crab color
+        };
+
+        const SCENE_BOUNDS = {
+            minX: -40,  // Doubled from -20
+            maxX: 40,   // Doubled from 20
+            minY: -20,  // Increased depth
+            maxY: 20,   // Increased height
+            minZ: -20,  // Doubled from -10
+            maxZ: 20    // Doubled from 10
+        };
+
+        const SHARK_DETECTION_RADIUS = 15;  // Distance at which sharks detect the player
+        const SHARK_FOLLOW_SPEED = 0.05;    // How fast sharks move towards player
+
+        // Custom shader for underwater effect
+        const underwaterEffect = {
+            uniforms: {
+                "tDiffuse": { value: null },
+                "time": { value: 0.0 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float time;
+                varying vec2 vUv;
+                void main() {
+                    vec2 uv = vUv;
+                    // Reduced distortion values
+                    uv.x += sin(uv.y * 8.0 + time * 0.4) * 0.002;
+                    uv.y += cos(uv.x * 8.0 + time * 0.4) * 0.002;
+                    vec4 color = texture2D(tDiffuse, uv);
+                    // Subtle blue tint
+                    color.b += 0.1;
+                    gl_FragColor = color;
+                }
+            `
+        };
+
+        // Add this at the top with other global variables
+        let targetRotation = 0;
+        let currentRotation = 0;
+        const ROTATION_SPEED = 0.05; // Reduced from 0.1 for smoother turning
+
+        // Movement physics constants
+        const ACCELERATION = 0.008;
+        const DECELERATION = 0.95;
+        const MAX_SPEED = 0.2;
+        let currentVelocity = new THREE.Vector3();
+
+        // Add these variables at the top with other globals
+        const FISH_TURN_INTERVAL = 3000; // How often to check for random turns (milliseconds)
+        let lastTurnCheck = Date.now();
+
+        // Add these variables at the top
+        let lastGoldfishPosition = new THREE.Vector3();
+        let tailAnimationPhase = 0;
+        const TAIL_SPEED_MOVING = 0.2;
+        const TAIL_SPEED_IDLE = 0.1;
+        const TAIL_AMPLITUDE_MOVING = 0.5;
+        const TAIL_AMPLITUDE_IDLE = 0.2;
+
+        // Add these variables at the top with other globals
+        let isThirdPerson = false;
+        let thirdPersonCamera;
+        const moveSpeed = 0.2;
+        const keys = {
+            w: false,
+            a: false,
+            s: false,
+            d: false,
+            q: false,
+            e: false
+        };
+        let mouseX = 0;
+        let mouseY = 0;
+
+        // Add these variables near the top of the script section
+        let is2DMode = false;
+        let pixelCamera;
+        const PIXEL_SCALE = 32; // Size of one "pixel" unit
+
+        // Add this to store boundary wall meshes
+        const boundaryWalls = {
+            left: null,
+            right: null,
+            top: null,
+            bottom: null,
+            front: null,
+            back: null
+        };
+
+        // Add demon mode variables
+        let isDemonMode = false;
+        const DEMON_COLORS = {
+            water: 0x220000,  // Dark red water
+            goldfish: 0xff6666,  // Light red for player fish
+            shark: 0x990000,  // Dark red for sharks
+            smallFish: [0xcc0000],  // Medium red for small fish
+            coral: [0x660000, 0x880000, 0xaa0000],  // Various dark reds for coral
+            bubble: 0x330000,  // Very dark red bubbles
+            sand: 0x330000,  // Dark red sand
+            eye: 0xff0000,  // Bright red eyes
+            eyeShine: 0xffffff,  // Keep white shine
+            seaweed: [0x440000, 0x550000, 0x660000],  // Dark red seaweed
+            sharkEye: 0xff0000,  // Red eyes
+            sharkTeeth: 0xffffff  // Keep white teeth
+        };
+
+        // Add audio setup
+        let audioContext;
+        let audioElement;
+        let isVibing = false;
+        let bubbleSound; // Add bubble sound element
+        let lastBubbleTime = 0;
+        let underwaterAmbience; // Add underwater ambience sound
+
+        function setupAudio() {
+            audioElement = new Audio('sounds/dont-be-sad.mp3');
+            audioElement.loop = true;
+
+            // Setup bubble sound
+            bubbleSound = new Audio('sounds/bubble.mp3');
+            bubbleSound.volume = 0.15;
+
+            // Setup underwater ambience
+            underwaterAmbience = new Audio('sounds/Underwater-Ambience.mp3');
+            underwaterAmbience.loop = true;
+            underwaterAmbience.volume = 0.4; // Set to a subtle level
+
+            const vibeButton = document.querySelector('.vibe-button');
+            vibeButton.addEventListener('click', toggleVibe);
+        }
+
+        function playBubbleSound() {
+            // Clone the bubble sound to allow overlapping plays
+            const bubbleSoundClone = bubbleSound.cloneNode();
+            bubbleSoundClone.volume = 0.65;
+            bubbleSoundClone.play();
+        }
+
+        function checkRandomBubble() {
+            const currentTime = Date.now();
+            if (currentTime - lastBubbleTime > 10000) { // Only check if at least 10 seconds passed
+                // Random chance to play between 10-30 seconds
+                if (Math.random() < 0.1) { // 10% chance each second after the minimum time
+                    playBubbleSound();
+                    lastBubbleTime = currentTime;
+                }
+            }
+        }
+
+        function toggleVibe() {
+            const vibeButton = document.querySelector('.vibe-button');
+            if (!isVibing) {
+                audioElement.volume = 0.7;
+                audioElement.play();
+                // Lower underwater ambience volume when music plays
+                underwaterAmbience.volume = 0.2;
+                vibeButton.textContent = 'Stop Vibing';
+                vibeButton.classList.add('playing');
+            } else {
+                audioElement.pause();
+                // Restore underwater ambience volume when music stops
+                underwaterAmbience.volume = 0.4;
+                vibeButton.textContent = 'Start Vibing';
+                vibeButton.classList.remove('playing');
+            }
+            isVibing = !isVibing;
+        }
+
+        function init() {
+            // Setup renderer with better antialiasing and shadow mapping
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+
+            // Adjust camera position
+            camera.position.z = 25;
+            camera.position.y = 0;
+            camera.lookAt(0, -5, 0);
+
+            // Add lighting with better values
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0xffffdd, 1.2);
+            sunLight.position.set(0, 10, 5);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 1024;
+            sunLight.shadow.mapSize.height = 1024;
+            sunLight.shadow.camera.near = 0.5;
+            sunLight.shadow.camera.far = 50;
+            scene.add(sunLight);
+
+            // Add point lights with adjusted values
+            const pointLight1 = new THREE.PointLight(0x6666ff, 0.5, 50);
+            pointLight1.position.set(-10, 5, 10);
+            scene.add(pointLight1);
+
+            const pointLight2 = new THREE.PointLight(0x66ffff, 0.5, 50);
+            pointLight2.position.set(10, 5, -10);
+            scene.add(pointLight2);
+
+            // Add subtle underwater caustics effect with moving light
+            const causticsLight = new THREE.PointLight(0x00ffff, 0.3, 30);
+            causticsLight.position.set(0, 10, 0);
+            scene.add(causticsLight);
+
+            // Store the caustics light for animation
+            scene.userData.causticsLight = causticsLight;
+
+            // Create scene elements
+            setupPostProcessing();
+            createGoldfish();
+            createSharks(3);
+            createAnglerFish(5); // Add 5 angler fish
+            createSchoolOfFish(30);
+            createSeafloor();
+            createCoral();
+            createBubbles();
+            createSeaweed();
+            createBoundaryWalls();
+            createRockFormations();  // Add rock formations
+            createCrabs();          // Add crabs
+
+            // Event listeners
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', onMouseMove);
+
+            // View toggle button listener
+            const viewButton = document.querySelector('.view-toggle');
+            viewButton.addEventListener('click', toggleView);
+
+            // Add setupAudio to init
+            setupAudio();
+
+            createFloatingText();
+        }
+
+        function setupPostProcessing() {
+            composer = new EffectComposer(renderer);
+            composer.addPass(new RenderPass(scene, camera));
+
+            // Adjust bloom values for cleaner look
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                0.5,  // Reduced strength
+                0.4,  // Increased radius
+                0.3   // Increased threshold
+            );
+            composer.addPass(bloomPass);
+
+            // Adjust underwater effect for cleaner look
+            const underwaterPass = new ShaderPass(underwaterEffect);
+            underwaterPass.uniforms.time.value = 0.0;
+            composer.addPass(underwaterPass);
+        }
+
+        function createVoxelModel(color, size = 1, isEmissive = false) {
+            const geometry = new THREE.BoxGeometry(size, size, size);
+            const material = new THREE.MeshPhongMaterial({
+                color: color,
+                shininess: 60,
+                emissive: isEmissive ? color : 0x000000,
+                emissiveIntensity: isEmissive ? 0.5 : 0
+            });
+            return new THREE.Mesh(geometry, material);
+        }
+
+        function createGoldfish() {
+            const group = new THREE.Group();
+
+            // Main body - multiple segments with glow
+            const bodySegments = 3;
+            for (let i = 0; i < bodySegments; i++) {
+                const size = 1 - (i * 0.15);  // Gradually smaller
+                const body = new THREE.Mesh(
+                    new THREE.BoxGeometry(size, size, size),
+                    new THREE.MeshPhongMaterial({
+                        color: COLORS.goldfish,
+                        shininess: 80,  // Increased shininess
+                        emissive: COLORS.goldfish,  // Add emissive glow
+                        emissiveIntensity: 0.6,  // Strong glow
+                        transparent: true,
+                        opacity: 0.9  // Slight transparency for glow effect
+                    })
+                );
+                body.position.x = -i * 0.4;  // Stack segments
+                group.add(body);
+            }
+
+            // Tail with glow
+            const tailGroup = new THREE.Group();
+            const tailPieces = 5;
+            for (let i = 0; i < tailPieces; i++) {
+                const tail = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.3, 0.3, 0.3),
+                    new THREE.MeshPhongMaterial({
+                        color: COLORS.goldfish,
+                        shininess: 80,
+                        emissive: COLORS.goldfish,
+                        emissiveIntensity: 0.4,  // Slightly less glow for tail
+                        transparent: true,
+                        opacity: 0.9
+                    })
+                );
+                tail.position.x = -1.2 - (i * 0.2);
+                tail.position.y = Math.sin(i * 0.5) * 0.2;
+                tail.rotation.z = Math.PI * 0.15;
+                tailGroup.add(tail);
+            }
+            group.add(tailGroup);
+
+            // Fins with glow
+            const topFin = new THREE.Group();
+            for (let i = 0; i < 3; i++) {
+                const fin = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.2, 0.2),
+                    new THREE.MeshPhongMaterial({
+                        color: COLORS.goldfish,
+                        shininess: 80,
+                        emissive: COLORS.goldfish,
+                        emissiveIntensity: 0.5,
+                        transparent: true,
+                        opacity: 0.9
+                    })
+                );
+                fin.position.y = 0.6 + (i * 0.15);
+                fin.position.x = -0.2 - (i * 0.1);
+                topFin.add(fin);
+            }
+            group.add(topFin);
+
+            // Side fins with glow
+            const leftFin = new THREE.Group();
+            const rightFin = new THREE.Group();
+            for (let i = 0; i < 3; i++) {
+                const finMaterial = new THREE.MeshPhongMaterial({
+                    color: COLORS.goldfish,
+                    shininess: 80,
+                    emissive: COLORS.goldfish,
+                    emissiveIntensity: 0.5,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                const finL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), finMaterial);
+                const finR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), finMaterial);
+                finL.position.z = 0.4 + (i * 0.1);
+                finR.position.z = -0.4 - (i * 0.1);
+                finL.position.x = -0.2 - (i * 0.1);
+                finR.position.x = -0.2 - (i * 0.1);
+                leftFin.add(finL);
+                rightFin.add(finR);
+            }
+            group.add(leftFin);
+            group.add(rightFin);
+
+            // Add eyes with glow
+            // Create main eye cubes that protrude from the body
+            const eyeGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+            const eyeMaterial = new THREE.MeshPhongMaterial({
+                color: COLORS.eye,
+                shininess: 100,
+                emissive: 0x222222,
+                emissiveIntensity: 0.2
+            });
+
+            const leftEyeMain = new THREE.Mesh(eyeGeometry, eyeMaterial.clone());
+            const rightEyeMain = new THREE.Mesh(eyeGeometry, eyeMaterial.clone());
+
+            // Position eyes to protrude slightly from the body
+            leftEyeMain.position.set(0.4, 0.2, 0.5);
+            rightEyeMain.position.set(0.4, 0.2, -0.5);
+
+            // Create smaller white shine cubes
+            const shineGeometry = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+            const shineMaterial = new THREE.MeshPhongMaterial({
+                color: COLORS.eyeShine,
+                shininess: 100,
+                emissive: COLORS.eyeShine,
+                emissiveIntensity: 0.8
+            });
+
+            const leftEyeShine = new THREE.Mesh(shineGeometry, shineMaterial.clone());
+            const rightEyeShine = new THREE.Mesh(shineGeometry, shineMaterial.clone());
+
+            // Position shine slightly forward and up on each eye
+            leftEyeShine.position.set(0.1, 0.1, 0);
+            rightEyeShine.position.set(0.1, 0.1, 0);
+
+            // Add shine to eyes
+            leftEyeMain.add(leftEyeShine);
+            rightEyeMain.add(rightEyeShine);
+
+            // Add eyes to main group
+            group.add(leftEyeMain, rightEyeMain);
+
+            // Store tail group in goldfish userData for animation
+            goldfish = group;
+            goldfish.userData.tailGroup = tailGroup;
+            scene.add(goldfish);
+
+            return group;
+        }
+
+        function createSharks(count) {
+            for (let i = 0; i < count; i++) {
+                const group = new THREE.Group();
+
+                // Body segments
+                const segments = 5;
+                for (let j = 0; j < segments; j++) {
+                    const size = 2 - (j * 0.2);
+                    const body = createVoxelModel(COLORS.shark, size);
+                    body.position.x = -j * 1.2;
+                    group.add(body);
+                }
+
+                // Tail
+                const tailGroup = new THREE.Group();
+                for (let j = 0; j < 4; j++) {
+                    const tail = createVoxelModel(COLORS.shark, 0.8 - (j * 0.1));
+                    tail.position.x = -6 - (j * 0.5);
+                    tail.position.y = Math.sin(j * 0.8) * 0.5;
+                    tail.rotation.z = Math.PI * 0.1;
+                    tailGroup.add(tail);
+                }
+                group.add(tailGroup);
+
+                // Dorsal fin
+                const dorsalFin = new THREE.Group();
+                for (let j = 0; j < 3; j++) {
+                    const fin = createVoxelModel(COLORS.shark, 0.6 - (j * 0.1));
+                    fin.position.y = 1.5 + (j * 0.4);
+                    fin.position.x = -1 - (j * 0.2);
+                    dorsalFin.add(fin);
+                }
+                group.add(dorsalFin);
+
+                // Side fins
+                const sideFinL = new THREE.Group();
+                const sideFinR = new THREE.Group();
+                for (let j = 0; j < 3; j++) {
+                    const finL = createVoxelModel(COLORS.shark, 0.5);
+                    const finR = createVoxelModel(COLORS.shark, 0.5);
+                    finL.position.z = 1.2 + (j * 0.3);
+                    finR.position.z = -1.2 - (j * 0.3);
+                    finL.position.x = -2 - (j * 0.2);
+                    finR.position.x = -2 - (j * 0.2);
+                    sideFinL.add(finL);
+                    sideFinR.add(finR);
+                }
+                group.add(sideFinL);
+                group.add(sideFinR);
+
+                // Add more menacing eyes for sharks - moved forward
+                const leftEye = new THREE.Group();
+                const rightEye = new THREE.Group();
+
+                // Main eye parts - now red and glowing
+                const leftEyeMain = createVoxelModel(COLORS.sharkEye, 0.4, true);
+                const rightEyeMain = createVoxelModel(COLORS.sharkEye, 0.4, true);
+
+                // Brighter eye shine
+                const leftEyeShine = createVoxelModel(COLORS.eyeShine, 0.2);
+                const rightEyeShine = createVoxelModel(COLORS.eyeShine, 0.2);
+
+                leftEyeShine.position.set(0.2, 0.1, 0.1);  // Moved forward
+                rightEyeShine.position.set(0.2, 0.1, 0.1);  // Moved forward
+
+                leftEye.add(leftEyeMain, leftEyeShine);
+                rightEye.add(rightEyeMain, rightEyeShine);
+
+                // Adjusted eye positions to be more forward
+                leftEye.position.set(1.2, 0.3, 1.0);
+                rightEye.position.set(1.2, 0.3, -1.0);
+
+                group.add(leftEye, rightEye);
+
+                // Initialize shark with no teeth visible
+                group.userData = {
+                    teeth: null,
+                    teethVisible: false,
+                    attacking: false,
+                    cooldown: false,
+                    cooldownTime: 0
+                };
+
+                group.position.set(
+                    Math.random() * 40 - 20,
+                    Math.random() * 20 - 10,
+                    Math.random() * 10 - 5
+                );
+
+                sharks.push(group);
+                scene.add(group);
+            }
+        }
+
+        // Add new function to create angler fish
+        function createAnglerFish(count) {
+            // Remove the local array declaration since we're using the global one
+            for (let i = 0; i < count; i++) {
+                const group = new THREE.Group();
+
+                // Main body - lighter color and slight glow
+                const body = createVoxelModel(0x555555, 1, true); // Lighter body with glow
+                body.material.emissiveIntensity = 0.3;
+                group.add(body);
+
+                // Jaw - matching body color
+                const jaw = createVoxelModel(0x555555, 0.8, true);
+                jaw.material.emissiveIntensity = 0.3;
+                jaw.position.set(0.3, -0.4, 0);
+                jaw.rotation.z = Math.PI * 0.1;
+                group.add(jaw);
+
+                // Teeth - brighter and more visible
+                for (let t = 0; t < 4; t++) {
+                    const tooth = createVoxelModel(0xffffff, 0.2, true);
+                    tooth.material.emissiveIntensity = 0.5;
+                    tooth.position.set(0.3, -0.3, -0.3 + (t * 0.2));
+                    group.add(tooth);
+                }
+
+                // Add eyes with enhanced glow
+                const leftEye = new THREE.Group();
+                const rightEye = new THREE.Group();
+
+                // Main eye parts (white and glowing)
+                const leftEyeMain = createVoxelModel(0xffffff, 0.3, true); // Changed to white
+                const rightEyeMain = createVoxelModel(0xffffff, 0.3, true);
+                leftEyeMain.material.emissiveIntensity = 1.0;
+                rightEyeMain.material.emissiveIntensity = 1.0;
+
+                // Eye shine
+                const leftEyeShine = createVoxelModel(0xcccccc, 0.15, true); // Light gray shine
+                const rightEyeShine = createVoxelModel(0xcccccc, 0.15, true);
+                leftEyeShine.material.emissiveIntensity = 1.0;
+                rightEyeShine.material.emissiveIntensity = 1.0;
+
+                leftEyeShine.position.set(0.05, 0.05, 0.05);
+                rightEyeShine.position.set(0.05, 0.05, 0.05);
+
+                leftEye.add(leftEyeMain, leftEyeShine);
+                rightEye.add(rightEyeMain, rightEyeShine);
+
+                // Position eyes slightly outside the head
+                leftEye.position.set(0.2, 0.2, 0.6);
+                rightEye.position.set(0.2, 0.2, -0.6);
+
+                group.add(leftEye, rightEye);
+
+                // Light rod with enhanced glow
+                const rod = new THREE.Group();
+                const rodSegments = 3;
+                for (let j = 0; j < rodSegments; j++) {
+                    const segment = createVoxelModel(0x666666, 0.2, true);
+                    segment.material.emissiveIntensity = 0.3;
+                    segment.position.set(0.2 + (j * 0.2), 0.6 + (j * 0.2), 0);
+                    rod.add(segment);
+                }
+                group.add(rod);
+
+                // Glowing light bulb - brighter and more intense
+                const light = createVoxelModel(0xffff00, 0.3, true); // Bright yellow
+                light.material.emissiveIntensity = 3.0; // Increased intensity
+                light.position.set(0.8, 1.2, 0);
+                group.add(light);
+
+                // Enhanced point light at the bulb position
+                const pointLight = new THREE.PointLight(0xffff66, 2, 15); // Increased intensity and range
+                pointLight.position.copy(light.position);
+                group.add(pointLight);
+
+                // Position angler fish in darker areas
+                group.position.set(
+                    Math.random() * 40 - 20,
+                    Math.random() * 10 - 15,
+                    Math.random() * 20 - 10
+                );
+
+                // Store movement properties
+                group.userData = {
+                    originalY: group.position.y,
+                    moveSpeed: 0.02 + Math.random() * 0.02,
+                    phase: Math.random() * Math.PI * 2
+                };
+
+                anglerFish.push(group);
+                scene.add(group);
+            }
+        }
+
+        function createSchoolOfFish(count) {
+            for (let i = 0; i < count; i++) {
+                const group = new THREE.Group();
+                // Make every 5th fish glow
+                const isGlowing = i % 5 === 0;
+                const color = isGlowing ?
+                    COLORS.glowingFish[Math.floor(Math.random() * COLORS.glowingFish.length)] :
+                    COLORS.smallFish[Math.floor(Math.random() * COLORS.smallFish.length)];
+
+                // Body segments with glow
+                const segments = 3;
+                for (let j = 0; j < segments; j++) {
+                    const size = 0.3 - (j * 0.05);
+                    const body = createVoxelModel(color, size, isGlowing);
+                    if (isGlowing) {
+                        body.material.emissiveIntensity = 0.8;
+                    }
+                    body.position.x = -j * 0.2;
+                    group.add(body);
+                }
+
+                // Tail
+                const tail = new THREE.Group();
+                for (let j = 0; j < 2; j++) {
+                    const tailPiece = createVoxelModel(color, 0.15);
+                    tailPiece.position.x = -0.6 - (j * 0.1);
+                    tailPiece.position.y = Math.sin(j * 0.5) * 0.1;
+                    tail.add(tailPiece);
+                }
+                group.add(tail);
+
+                // Fins
+                const topFin = createVoxelModel(color, 0.15);
+                topFin.position.y = 0.2;
+                group.add(topFin);
+
+                // Add eyes (after body segments)
+                const leftEye = createVoxelModel(COLORS.eye, 0.1);
+                const rightEye = createVoxelModel(COLORS.eye, 0.1);
+
+                const leftEyeShine = createVoxelModel(COLORS.eyeShine, 0.05);
+                const rightEyeShine = createVoxelModel(COLORS.eyeShine, 0.05);
+
+                leftEyeShine.position.set(0.02, 0.02, 0.02);
+                rightEyeShine.position.set(0.02, 0.02, 0.02);
+
+                leftEye.add(leftEyeShine);
+                rightEye.add(rightEyeShine);
+
+                leftEye.position.set(0.1, 0.1, 0.15);
+                rightEye.position.set(0.1, 0.1, -0.15);
+
+                group.add(leftEye, rightEye);
+
+                group.position.set(
+                    Math.random() * 40 - 20,
+                    Math.random() * 20 - 10,
+                    Math.random() * 10 - 5
+                );
+
+                smallFish.push(group);
+                scene.add(group);
+            }
+        }
+
+        function createSeafloor() {
+            // Create sandy bottom with reduced emissive properties
+            const sandGeometry = new THREE.PlaneGeometry(400, 400, 50, 50);  // Increased size
+            const sandMaterial = new THREE.MeshPhongMaterial({
+                color: COLORS.sand,
+                shininess: 0.1,
+                emissive: COLORS.sand,
+                emissiveIntensity: 0.05,
+                flatShading: true
+            });
+
+            // Add more pronounced variation to the sand
+            const vertices = sandGeometry.attributes.position.array;
+            for (let i = 0; i < vertices.length; i += 3) {
+                vertices[i + 1] = Math.sin(vertices[i] / 3) * Math.cos(vertices[i + 2] / 3) * 0.8 +
+                    (Math.random() - 0.5) * 0.5;
+            }
+
+            const floor = new THREE.Mesh(sandGeometry, sandMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -20;  // Adjusted for new depth
+            scene.add(floor);
+
+            // Update the glowing line
+            const lineGeometry = new THREE.PlaneGeometry(400, 0.3);  // Increased width
+            const lineMaterial = new THREE.MeshBasicMaterial({
+                color: COLORS.sand,
+                transparent: true,
+                opacity: 0.4
+            });
+
+            const line = new THREE.Mesh(lineGeometry, lineMaterial);
+            line.rotation.x = -Math.PI / 2;
+            line.position.y = -19.95;  // Adjusted for new depth
+            scene.add(line);
+
+            // Make rocks darker and less reflective
+            for (let i = 0; i < 160; i++) {  // Doubled number of rocks
+                const size = 0.5 + Math.random() * 1.5;
+                const rock = createVoxelModel(0x334455, size);
+                rock.material.shininess = 0;
+                rock.position.set(
+                    Math.random() * 160 - 80,  // Doubled spread
+                    -20 + size / 2,            // Adjusted for new depth
+                    Math.random() * 80 - 40    // Doubled spread
+                );
+                rock.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                scene.add(rock);
+            }
+        }
+
+        function createCoral() {
+            for (let i = 0; i < 30; i++) {
+                const coralGroup = new THREE.Group();
+                const branchCount = 2 + Math.floor(Math.random() * 4);
+                const color = COLORS.coral[Math.floor(Math.random() * COLORS.coral.length)];
+
+                // Create main stem with reduced shine
+                const stem = createVoxelModel(color, 1);
+                stem.material.shininess = 30; // Reduced shininess
+                coralGroup.add(stem);
+
+                // Add branches with reduced shine
+                for (let j = 0; j < branchCount; j++) {
+                    const branch = new THREE.Group();
+                    const segments = 2 + Math.floor(Math.random() * 3);
+
+                    for (let k = 0; k < segments; k++) {
+                        const segment = createVoxelModel(color, 0.7 - k * 0.1);
+                        segment.material.shininess = 30; // Reduced shininess
+                        segment.position.y = k * 0.6;
+                        branch.add(segment);
+                    }
+
+                    branch.position.y = Math.random() * 2;
+                    branch.rotation.z = (Math.random() - 0.5) * Math.PI * 0.5;
+                    branch.rotation.x = (Math.random() - 0.5) * Math.PI * 0.5;
+                    coralGroup.add(branch);
+                }
+
+                // Position coral at seabed level (SCENE_BOUNDS.minY)
+                coralGroup.position.set(
+                    Math.random() * 40 - 20,
+                    SCENE_BOUNDS.minY + 0.5, // Adjusted to be at seabed level with slight offset
+                    Math.random() * 20 - 10
+                );
+
+                scene.add(coralGroup);
+            }
+        }
+
+        function createBubbles() {
+            for (let i = 0; i < 50; i++) {
+                const bubble = createVoxelModel(COLORS.bubble, 0.2, true);  // Make bubbles emissive
+                bubble.material.transparent = true;
+                bubble.material.opacity = 0.3 + Math.random() * 0.3;  // Varied opacity
+
+                // Store initial properties for animation
+                bubble.userData = {
+                    speed: 0.03 + Math.random() * 0.04,  // Varied speed
+                    wobble: Math.random() * Math.PI * 2,  // Random starting phase
+                    wobbleSpeed: 0.01 + Math.random() * 0.02  // Varied wobble speed
+                };
+
+                bubble.position.set(
+                    Math.random() * 40 - 20,
+                    -15,
+                    Math.random() * 20 - 10
+                );
+
+                bubbles.push(bubble);
+                scene.add(bubble);
+            }
+        }
+
+        function createSeaweed() {
+            for (let i = 0; i < 30; i++) {
+                const seaweedGroup = new THREE.Group();
+                const segments = 5 + Math.floor(Math.random() * 4); // Random height
+                const swayOffset = Math.random() * Math.PI * 2; // Different phase for each seaweed
+
+                for (let j = 0; j < segments; j++) {
+                    const color = COLORS.seaweed[Math.floor(Math.random() * COLORS.seaweed.length)];
+                    const segment = createVoxelModel(color, 0.5);
+                    segment.position.y = j * 0.5;
+                    // Add slight random offset for more natural look
+                    segment.position.x = Math.sin(j * 0.5) * 0.2;
+                    seaweedGroup.add(segment);
+                }
+
+                // Position the seaweed group at seabed level
+                seaweedGroup.position.set(
+                    Math.random() * 40 - 20,
+                    SCENE_BOUNDS.minY + 0.5, // Adjusted to be at seabed level with slight offset
+                    Math.random() * 20 - 10
+                );
+
+                // Store initial properties for animation
+                seaweedGroup.userData = {
+                    swayOffset,
+                    height: segments,
+                    swaySpeed: 0.5 + Math.random() * 0.5
+                };
+
+                scene.add(seaweedGroup);
+                seaweed.push(seaweedGroup);
+            }
+        }
+
+        // Add this function after init()
+        function createBoundaryWalls() {
+            const wallGeometry = new THREE.PlaneGeometry(40, 30);
+            const wallMaterial = new THREE.MeshPhongMaterial({
+                color: 0xff0000,
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide
+            });
+
+            // Create all walls
+            boundaryWalls.left = new THREE.Mesh(wallGeometry, wallMaterial.clone());
+            boundaryWalls.right = new THREE.Mesh(wallGeometry, wallMaterial.clone());
+            boundaryWalls.top = new THREE.Mesh(wallGeometry, wallMaterial.clone());
+            boundaryWalls.bottom = new THREE.Mesh(wallGeometry, wallMaterial.clone());
+            boundaryWalls.front = new THREE.Mesh(wallGeometry, wallMaterial.clone());
+            boundaryWalls.back = new THREE.Mesh(wallGeometry, wallMaterial.clone());
+
+            // Position walls
+            boundaryWalls.left.position.set(SCENE_BOUNDS.minX, 0, 0);
+            boundaryWalls.left.rotation.y = Math.PI / 2;
+
+            boundaryWalls.right.position.set(SCENE_BOUNDS.maxX, 0, 0);
+            boundaryWalls.right.rotation.y = Math.PI / 2;
+
+            boundaryWalls.top.position.set(0, SCENE_BOUNDS.maxY, 0);
+            boundaryWalls.top.rotation.x = Math.PI / 2;
+
+            boundaryWalls.bottom.position.set(0, SCENE_BOUNDS.minY, 0);
+            boundaryWalls.bottom.rotation.x = Math.PI / 2;
+
+            boundaryWalls.front.position.set(0, 0, SCENE_BOUNDS.maxZ);
+
+            boundaryWalls.back.position.set(0, 0, SCENE_BOUNDS.minZ);
+
+            // Add walls to scene
+            Object.values(boundaryWalls).forEach(wall => scene.add(wall));
+        }
+
+        function createRockFormations() {
+            // Create cliff walls
+            const cliffGeometry = new THREE.BoxGeometry(5, 30, 8);
+            const cliffMaterial = new THREE.MeshStandardMaterial({
+                color: COLORS.rocks[0],
+                roughness: 0.8,
+                metalness: 0.1,
+                flatShading: true
+            });
+
+            // Add several cliff sections along the boundaries
+            for (let i = 0; i < 8; i++) {
+                const cliff = new THREE.Mesh(cliffGeometry, cliffMaterial.clone());
+                cliff.position.set(
+                    (i % 2 === 0 ? SCENE_BOUNDS.minX + 2 : SCENE_BOUNDS.maxX - 2),
+                    -5,
+                    -15 + i * 5
+                );
+                cliff.material.color.setHex(COLORS.rocks[i % COLORS.rocks.length]);
+                scene.add(cliff);
+            }
+
+            // Create rock formations
+            for (let i = 0; i < 15; i++) {
+                const rockGroup = new THREE.Group();
+                const rockCount = 3 + Math.floor(Math.random() * 4);
+
+                for (let j = 0; j < rockCount; j++) {
+                    const size = 1 + Math.random() * 2;
+                    const rockGeometry = new THREE.BoxGeometry(size, size * 0.8, size);
+                    const rockMaterial = new THREE.MeshStandardMaterial({
+                        color: COLORS.rocks[Math.floor(Math.random() * COLORS.rocks.length)],
+                        roughness: 0.9,
+                        metalness: 0.1,
+                        flatShading: true
+                    });
+
+                    const rock = new THREE.Mesh(rockGeometry, rockMaterial);
+                    rock.position.set(
+                        (Math.random() - 0.5) * 2,
+                        j * size * 0.4,
+                        (Math.random() - 0.5) * 2
+                    );
+                    rock.rotation.set(
+                        Math.random() * 0.5,
+                        Math.random() * Math.PI,
+                        Math.random() * 0.5
+                    );
+                    rockGroup.add(rock);
+                }
+
+                rockGroup.position.set(
+                    Math.random() * (SCENE_BOUNDS.maxX - SCENE_BOUNDS.minX) + SCENE_BOUNDS.minX,
+                    SCENE_BOUNDS.minY + 2,
+                    Math.random() * (SCENE_BOUNDS.maxZ - SCENE_BOUNDS.minZ) + SCENE_BOUNDS.minZ
+                );
+                scene.add(rockGroup);
+            }
+        }
+
+        function createCrabs() {
+            for (let i = 0; i < 12; i++) {
+                const crab = new THREE.Group();
+
+                // Create crab body
+                const body = createVoxelModel(COLORS.crab, 0.6);
+                crab.add(body);
+
+                // Create claws
+                const leftClaw = new THREE.Group();
+                const rightClaw = new THREE.Group();
+
+                const clawParts = [
+                    { size: 0.3, x: 0.4, y: 0, z: 0.3 },
+                    { size: 0.2, x: 0.6, y: 0, z: 0.4 }
+                ];
+
+                clawParts.forEach(part => {
+                    const leftPart = createVoxelModel(COLORS.crab, part.size);
+                    const rightPart = createVoxelModel(COLORS.crab, part.size);
+
+                    leftPart.position.set(part.x, part.y, part.z);
+                    rightPart.position.set(part.x, part.y, -part.z);
+
+                    leftClaw.add(leftPart);
+                    rightClaw.add(rightPart);
+                });
+
+                // Create legs
+                const legs = [];
+                for (let j = 0; j < 6; j++) {
+                    const leg = createVoxelModel(COLORS.crab, 0.2);
+                    leg.position.set(
+                        (j % 3) * 0.2 - 0.2,
+                        0,
+                        j < 3 ? 0.3 : -0.3
+                    );
+                    legs.push(leg);
+                    crab.add(leg);
+                }
+
+                crab.add(leftClaw, rightClaw);
+
+                // Position crab on the seabed
+                crab.position.set(
+                    Math.random() * (SCENE_BOUNDS.maxX - SCENE_BOUNDS.minX) + SCENE_BOUNDS.minX,
+                    SCENE_BOUNDS.minY + 0.3,
+                    Math.random() * (SCENE_BOUNDS.maxZ - SCENE_BOUNDS.minZ) + SCENE_BOUNDS.minZ
+                );
+
+                crab.rotation.y = Math.random() * Math.PI * 2;
+
+                // Store animation properties
+                crab.userData = {
+                    legPhase: Math.random() * Math.PI * 2,
+                    moveSpeed: 0.02 + Math.random() * 0.02,
+                    originalY: crab.position.y
+                };
+
+                scene.add(crab);
+            }
+        }
+
+        // Restore cursor tracking for side view and improve third person camera
+        function onMouseMove(event) {
+            if (!isThirdPerson) {
+                // Convert mouse coordinates to 3D space
+                const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                // Calculate world position
+                const vector = new THREE.Vector3(mouseX, mouseY, 0);
+                vector.unproject(camera);
+                const dir = vector.sub(camera.position).normalize();
+                const distance = -camera.position.z / dir.z;
+                const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+
+                // Calculate movement direction
+                const movement = new THREE.Vector3();
+                movement.subVectors(pos, goldfish.position);
+
+                // Only update rotation if there's significant movement
+                if (movement.length() > 0.01) {
+                    // Set target rotation based on movement direction
+                    if (movement.x > 0) {
+                        // Moving right
+                        targetRotation = 0; // Point right with 90-degree offset
+                    } else {
+                        // Moving left
+                        targetRotation = Math.PI; // Point left with 90-degree offset
+                    }
+
+                    // Smooth rotation interpolation
+                    const rotationDiff = targetRotation - currentRotation;
+                    if (Math.abs(rotationDiff) > 0.01) {
+                        currentRotation += rotationDiff * ROTATION_SPEED;
+                        goldfish.rotation.y = currentRotation;
+                    }
+                }
+
+                // Update goldfish position with closer following
+                goldfish.position.x = pos.x * 1.2;
+                goldfish.position.y = pos.y * 1.2;
+
+                // Tilt based on vertical movement
+                goldfish.rotation.x = -mouseY * 0.3;
+            } else {
+                // Update camera angle based on mouse movement
+                mouseX -= event.movementX * 0.002;
+                mouseY = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, mouseY - event.movementY * 0.002));
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isThirdPerson) {
+                updateThirdPersonMovement();
+            }
+
+            updateGoldfishTail();
+
+            // Check for random bubble sound
+            checkRandomBubble();
+
+            // Add smooth rotation interpolation
+            const rotationDiff = targetRotation - currentRotation;
+            if (Math.abs(rotationDiff) > 0.01) {
+                currentRotation += rotationDiff * ROTATION_SPEED;
+                goldfish.rotation.y = currentRotation;
+            }
+
+            // Update underwater shader
+            underwaterEffect.uniforms.time.value += 0.01;
+
+            // Animate sharks
+            updateSharks();
+
+            // Animate angler fish
+            updateAnglerFish();
+
+            // Animate small fish in schools
+            smallFish.forEach((fish, i) => {
+                const time = Date.now() * 0.001;
+                fish.position.x += Math.sin(time + i) * 0.05;
+                fish.position.y += Math.cos(time + i * 0.5) * 0.03;
+                fish.rotation.y = Math.sin(time + i) * 0.2;
+            });
+
+            // Animate bubbles
+            bubbles.forEach(bubble => {
+                bubble.userData.wobble += bubble.userData.wobbleSpeed;
+
+                bubble.position.y += bubble.userData.speed;
+                bubble.position.x += Math.sin(bubble.userData.wobble) * 0.02;
+                bubble.position.z += Math.cos(bubble.userData.wobble) * 0.02;
+
+                const scale = 1 + Math.sin(bubble.userData.wobble) * 0.1;
+                bubble.scale.set(scale, scale, scale);
+                bubble.rotation.y = bubble.userData.wobble * 0.2;
+
+                if (bubble.position.y > 15) {
+                    bubble.position.y = -15;
+                    bubble.position.x = Math.random() * 40 - 20;
+                    bubble.position.z = Math.random() * 20 - 10;
+                }
+
+                bubble.material.opacity = 0.3 + Math.sin(bubble.userData.wobble) * 0.2;
+            });
+
+            // Animate seaweed
+            seaweed.forEach(plant => {
+                const time = Date.now() * 0.001;
+                for (let i = 0; i < plant.children.length; i++) {
+                    const segment = plant.children[i];
+                    const swayAmount = (i / plant.userData.height) * 0.5;
+                    segment.position.x = Math.sin(time * plant.userData.swaySpeed + plant.userData.swayOffset)
+                        * swayAmount;
+                }
+            });
+
+            // Update fish interactions
+            updateFishInteractions();
+            updateRandomFishTurning();
+
+            // Animate caustics light
+            if (scene.userData.causticsLight) {
+                const time = Date.now() * 0.001;
+                scene.userData.causticsLight.position.x = Math.sin(time * 0.5) * 10;
+                scene.userData.causticsLight.position.z = Math.cos(time * 0.5) * 10;
+                scene.userData.causticsLight.intensity = 0.2 + Math.sin(time * 2) * 0.1;
+            }
+
+            // Animate crabs
+            scene.traverse((object) => {
+                if (object instanceof THREE.Group && object.userData.legPhase !== undefined) {
+                    // Crab walking animation
+                    object.userData.legPhase += 0.1;
+
+                    // Move legs up and down
+                    object.children.forEach((child, index) => {
+                        if (index > 0 && index <= 6) { // Legs only
+                            child.position.y = Math.sin(object.userData.legPhase + index) * 0.1;
+                        }
+                    });
+
+                    // Sideways movement
+                    object.position.x += Math.cos(object.userData.legPhase) * object.userData.moveSpeed;
+                    object.position.y = object.userData.originalY + Math.abs(Math.sin(object.userData.legPhase * 0.5)) * 0.1;
+
+                    // Keep within bounds and change direction
+                    if (object.position.x > SCENE_BOUNDS.maxX - 2) {
+                        object.rotation.y = Math.PI;
+                    } else if (object.position.x < SCENE_BOUNDS.minX + 2) {
+                        object.rotation.y = 0;
+                    }
+                }
+            });
+
+            updateFloatingText();
+
+            composer.render();
+        }
+
+        // Add fish interaction behavior
+        function updateFishInteractions() {
+            const goldfishPosition = new THREE.Vector3();
+            goldfish.getWorldPosition(goldfishPosition);
+
+            // Update small fish behavior
+            smallFish.forEach(fish => {
+                const fishPosition = new THREE.Vector3();
+                fish.getWorldPosition(fishPosition);
+                const distance = fishPosition.distanceTo(goldfishPosition);
+
+                if (distance < 4) {  // Increased detection radius for earlier reaction
+                    // Calculate escape direction
+                    const escapeVector = new THREE.Vector3();
+                    escapeVector.subVectors(fishPosition, goldfishPosition);
+                    escapeVector.normalize();
+
+                    // Scale escape strength based on proximity - faster dash when very close
+                    const escapeStrength = Math.max(0, 1 - (distance / 4)) * 0.3; // Increased from 0.1 to 0.3 for faster dash
+
+                    // Store escape behavior in fish's userData
+                    fish.userData.escaping = true;
+                    fish.userData.escapeVector = escapeVector;
+                    fish.userData.escapeStrength = escapeStrength;
+                    fish.userData.escapeTime = 60;  // Shorter escape duration for quicker dash
+                }
+
+                if (fish.userData.escaping) {
+                    // Apply escape movement with easing
+                    fish.position.add(
+                        fish.userData.escapeVector.clone().multiplyScalar(
+                            fish.userData.escapeStrength * (fish.userData.escapeTime / 60)
+                        )
+                    );
+                    fish.userData.escapeTime--;
+
+                    // Reset escape behavior after time
+                    if (fish.userData.escapeTime <= 0) {
+                        fish.userData.escaping = false;
+                    }
+                }
+            });
+
+            // Update shark behavior - attack when player is close
+            sharks.forEach(shark => {
+                const sharkPosition = new THREE.Vector3();
+                shark.getWorldPosition(sharkPosition);
+                const distance = sharkPosition.distanceTo(goldfishPosition);
+
+                // Only allow attack if not in cooldown
+                if (distance < 6 && !shark.userData.attacking && !shark.userData.cooldown) {
+                    // Calculate attack direction
+                    const attackVector = new THREE.Vector3();
+                    attackVector.subVectors(goldfishPosition, sharkPosition);
+                    attackVector.normalize();
+
+                    // Store attack behavior
+                    shark.userData.attacking = true;
+                    shark.userData.attackVector = attackVector;
+                    shark.userData.attackTime = 30; // Attack duration
+
+                    // Show teeth during attack if not already showing
+                    if (!shark.userData.teethVisible) {
+                        addSharkTeeth(shark);
+                        shark.userData.teethVisible = true;
+                    }
+
+                    // Rotate shark to face player
+                    const targetRotation = Math.atan2(attackVector.x, attackVector.z);
+                    shark.rotation.y = targetRotation;
+                }
+
+                if (shark.userData.attacking) {
+                    // Quick lunge forward
+                    if (shark.userData.attackTime > 15) {
+                        shark.position.add(
+                            shark.userData.attackVector.clone().multiplyScalar(0.2)
+                        );
+                    } else {
+                        // Slow retreat after attack
+                        shark.position.add(
+                            shark.userData.attackVector.clone().multiplyScalar(-0.05)
+                        );
+                    }
+
+                    shark.userData.attackTime--;
+
+                    // Reset attack behavior after time
+                    if (shark.userData.attackTime <= 0) {
+                        shark.userData.attacking = false;
+
+                        // Start cooldown period (10 seconds)
+                        shark.userData.cooldown = true;
+                        shark.userData.cooldownTime = 600; // 60fps * 10 seconds = 600 frames
+
+                        // Hide teeth after attack
+                        if (shark.userData.teeth) {
+                            shark.userData.teeth.forEach(tooth => {
+                                tooth.visible = false;
+                            });
+                            shark.userData.teethVisible = false;
+                        }
+                    }
+                }
+
+                // Handle cooldown timer
+                if (shark.userData.cooldown) {
+                    shark.userData.cooldownTime--;
+
+                    // End cooldown after time expires
+                    if (shark.userData.cooldownTime <= 0) {
+                        shark.userData.cooldown = false;
+                    }
+                }
+            });
+        }
+
+        // Add function to create shark teeth
+        function addSharkTeeth(shark) {
+            // Create teeth if they don't exist yet
+            if (!shark.userData.teeth) {
+                shark.userData.teeth = [];
+
+                // Create top teeth
+                for (let i = 0; i < 4; i++) {
+                    const tooth = createVoxelModel(COLORS.sharkTeeth, 0.3);
+                    tooth.position.set(1.5, -0.5, -0.6 + i * 0.4);
+                    tooth.rotation.z = Math.PI / 4; // Angle teeth
+                    shark.add(tooth);
+                    shark.userData.teeth.push(tooth);
+                }
+
+                // Create bottom teeth
+                for (let i = 0; i < 4; i++) {
+                    const tooth = createVoxelModel(COLORS.sharkTeeth, 0.3);
+                    tooth.position.set(1.5, -1.0, -0.6 + i * 0.4);
+                    tooth.rotation.z = -Math.PI / 4; // Angle teeth opposite
+                    shark.add(tooth);
+                    shark.userData.teeth.push(tooth);
+                }
+            }
+
+            // Make teeth visible
+            shark.userData.teeth.forEach(tooth => {
+                tooth.visible = true;
+            });
+        }
+
+        // Add this function to handle random fish turning
+        function updateRandomFishTurning() {
+            const currentTime = Date.now();
+            if (currentTime - lastTurnCheck > FISH_TURN_INTERVAL) {
+                // Select 2 random fish to turn
+                for (let i = 0; i < 2; i++) {
+                    const randomFish = smallFish[Math.floor(Math.random() * smallFish.length)];
+                    if (!randomFish.userData.turning) { // Only turn if not already turning
+                        randomFish.userData.turning = true;
+                        randomFish.userData.targetRotation = randomFish.rotation.y + (Math.random() > 0.5 ? Math.PI : -Math.PI);
+                        randomFish.userData.turnSpeed = 0.05;
+                        randomFish.userData.turnProgress = 0;
+                    }
+                }
+                lastTurnCheck = currentTime;
+            }
+
+            // Update turning animation for all fish
+            smallFish.forEach(fish => {
+                if (fish.userData.turning) {
+                    fish.userData.turnProgress += fish.userData.turnSpeed;
+
+                    // Smooth turning animation
+                    fish.rotation.y = THREE.MathUtils.lerp(
+                        fish.rotation.y,
+                        fish.userData.targetRotation,
+                        fish.userData.turnProgress
+                    );
+
+                    // Complete turn
+                    if (fish.userData.turnProgress >= 1) {
+                        fish.userData.turning = false;
+                        fish.rotation.y = fish.userData.targetRotation;
+                    }
+                }
+            });
+        }
+
+        // Add this function to animate the tail
+        function updateGoldfishTail() {
+            if (!goldfish.userData.tailGroup) return;
+
+            // Calculate movement speed
+            const currentPosition = goldfish.position.clone();
+            const movement = currentPosition.distanceTo(lastGoldfishPosition);
+            lastGoldfishPosition.copy(currentPosition);
+
+            // Determine animation parameters based on movement
+            const isMoving = movement > 0.01;
+            const speed = isMoving ? TAIL_SPEED_MOVING : TAIL_SPEED_IDLE;
+            const amplitude = isMoving ? TAIL_AMPLITUDE_MOVING : TAIL_AMPLITUDE_IDLE;
+
+            // Animate tail segments
+            tailAnimationPhase += speed;
+            goldfish.userData.tailGroup.children.forEach((segment, index) => {
+                const offset = index * 0.5; // Phase offset for each segment
+                segment.rotation.y = Math.sin(tailAnimationPhase + offset) * amplitude;
+            });
+        }
+
+        // Add these functions after init()
+        function setupThirdPersonMode() {
+            thirdPersonCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            thirdPersonCamera.position.set(0, 2, 10);
+
+            // Reset fish position to center of map
+            if (goldfish) {
+                goldfish.position.set(0, 0, 0);  // Center position
+                goldfish.rotation.y = 0;  // Reset rotation
+            }
+
+            // Event listeners for third person controls
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+            document.addEventListener('mousemove', onThirdPersonMouseMove);
+
+            // Lock pointer for camera control
+            document.body.requestPointerLock();
+        }
+
+        function cleanupThirdPersonMode() {
+            document.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('keyup', onKeyUp);
+            document.removeEventListener('mousemove', onThirdPersonMouseMove);
+            document.exitPointerLock();
+
+            // Reset main camera position and rotation
+            camera.position.set(0, 0, 25);
+            camera.rotation.set(0, 0, 0);
+            camera.lookAt(0, -5, 0);
+
+            // Reset composer to use main camera
+            composer.passes[0].camera = camera;
+        }
+
+        function onKeyDown(event) {
+            if (event.key.toLowerCase() in keys) {
+                keys[event.key.toLowerCase()] = true;
+            }
+            if (event.key === 'Escape') {
+                toggleView();
+            }
+        }
+
+        function onKeyUp(event) {
+            if (event.key.toLowerCase() in keys) {
+                keys[event.key.toLowerCase()] = false;
+            }
+        }
+
+        function onThirdPersonMouseMove(event) {
+            if (isThirdPerson) {
+                mouseX -= event.movementX * 0.002;
+                mouseY = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, mouseY - event.movementY * 0.002));
+            }
+        }
+
+        function toggleView() {
+            isThirdPerson = !isThirdPerson;
+            const button = document.querySelector('.view-toggle');
+            const controlsBox = document.querySelector('.controls-box');
+            const real2dButton = document.querySelector('.real2d-toggle');
+            const controlsPanel = document.querySelector('.controls-panel');
+
+            if (isThirdPerson) {
+                setupThirdPersonMode();
+                if (button) button.textContent = 'Return to Cursor Mode';
+                if (controlsBox) controlsBox.style.display = 'block';
+                if (real2dButton) real2dButton.style.display = 'none';
+                if (controlsPanel) controlsPanel.style.display = 'block';
+            } else {
+                cleanupThirdPersonMode();
+                // Reset goldfish position and rotation when returning to cursor mode
+                if (goldfish) {
+                    goldfish.position.set(0, 0, 0);
+                    goldfish.rotation.set(0, 0, 0);
+                }
+                if (button) button.textContent = 'Switch to Third Person';
+                if (controlsBox) controlsBox.style.display = 'none';
+                if (real2dButton) real2dButton.style.display = 'block';
+                if (controlsPanel) controlsPanel.style.display = 'none';
+            }
+        }
+
+        // Add this function after init()
+        function setup2DMode() {
+            // Create orthographic camera for 2D view
+            const aspectRatio = window.innerWidth / window.innerHeight;
+            const viewHeight = 20;
+            pixelCamera = new THREE.OrthographicCamera(
+                -viewHeight * aspectRatio / 2,
+                viewHeight * aspectRatio / 2,
+                viewHeight / 2,
+                -viewHeight / 2,
+                0.1,
+                1000
+            );
+            pixelCamera.position.set(0, 0, 20);
+            pixelCamera.lookAt(0, 0, 0);
+
+            // Add pixelated effect to renderer
+            renderer.domElement.classList.add('pixelated');
+
+            // Convert existing objects to pixel art style
+            convertToPixelStyle();
+        }
+
+        function convertToPixelStyle() {
+            // Create a blue gradient background
+            const bgGeometry = new THREE.PlaneGeometry(200, 100);
+            const bgMaterial = new THREE.MeshBasicMaterial({
+                color: 0x0066ff,
+                transparent: true,
+                opacity: 0.8
+            });
+            const background = new THREE.Mesh(bgGeometry, bgMaterial);
+            background.position.z = -20;
+            scene.add(background);
+
+            // Create rocky sides
+            const leftRockGeometry = new THREE.PlaneGeometry(20, 100);
+            const rightRockGeometry = new THREE.PlaneGeometry(20, 100);
+            const rockMaterial = new THREE.MeshPhongMaterial({
+                color: 0x333333,
+                shininess: 0
+            });
+
+            const leftRock = new THREE.Mesh(leftRockGeometry, rockMaterial);
+            const rightRock = new THREE.Mesh(rightRockGeometry, rockMaterial);
+
+            leftRock.position.set(-90, 0, -15);
+            rightRock.position.set(90, 0, -15);
+
+            scene.add(leftRock);
+            scene.add(rightRock);
+
+            // Create pixelated seabed with coral
+            const seabedGeometry = new THREE.PlaneGeometry(200, 30);
+            const seabedMaterial = new THREE.MeshPhongMaterial({
+                color: COLORS.sand,
+                shininess: 10
+            });
+            const seabed = new THREE.Mesh(seabedGeometry, seabedMaterial);
+            seabed.position.y = -35;
+            seabed.position.z = -10;
+            scene.add(seabed);
+
+            // Add coral decorations
+            const coralColors = COLORS.coral;
+            for (let i = 0; i < 20; i++) {
+                const coralGeometry = new THREE.PlaneGeometry(2, 3);
+                const coralMaterial = new THREE.MeshPhongMaterial({
+                    color: coralColors[Math.floor(Math.random() * coralColors.length)],
+                    shininess: 30
+                });
+                const coral = new THREE.Mesh(coralGeometry, coralMaterial);
+                coral.position.set(
+                    Math.random() * 180 - 90,
+                    -33,
+                    -9
+                );
+                scene.add(coral);
+            }
+
+            // Convert all fish to flat sprites
+            scene.traverse((object) => {
+                if (object.material) {
+                    if (object.geometry instanceof THREE.BoxGeometry) {
+                        const scale = object.scale.x;
+                        object.geometry = new THREE.PlaneGeometry(scale, scale);
+                        object.material = new THREE.MeshBasicMaterial({
+                            color: object.material.color,
+                            transparent: true,
+                            opacity: 0.9
+                        });
+                        object.position.z = 0;
+                    }
+                }
+            });
+        }
+
+        // Add this function to handle 2D mode toggle
+        function toggle2DMode() {
+            is2DMode = !is2DMode;
+            const button = document.querySelector('.real2d-toggle');
+
+            if (is2DMode) {
+                setup2DMode();
+                button.textContent = 'Return to 3D Mode';
+            } else {
+                // Restore 3D view
+                renderer.domElement.classList.remove('pixelated');
+                button.textContent = 'Switch to 2D Mode';
+                init(); // Reinitialize the 3D scene
+            }
+        }
+
+        // Add new function for 2D animations
+        function updatePixelAnimations() {
+            // Simplified tail animation
+            if (goldfish && goldfish.userData.tailGroup) {
+                tailAnimationPhase += 0.1;
+                goldfish.userData.tailGroup.rotation.y = Math.sin(tailAnimationPhase) * 0.2;
+            }
+
+            // Simple bubble animation
+            bubbles.forEach(bubble => {
+                bubble.position.y += 0.1;
+                if (bubble.position.y > 15) {
+                    bubble.position.y = -15;
+                    bubble.position.x = Math.random() * 40 - 20;
+                }
+            });
+
+            // Simple fish animations
+            smallFish.forEach((fish, i) => {
+                const time = Date.now() * 0.001;
+                fish.position.x += Math.sin(time + i) * 0.02;
+                fish.position.y += Math.cos(time + i * 0.5) * 0.01;
+            });
+        }
+        // Improve third person camera following in updateThirdPersonMovement
+        function updateThirdPersonMovement() {
+            const moveVector = new THREE.Vector3();
+
+            // Get camera's forward and right vectors (flattened to xz plane)
+            const cameraForward = new THREE.Vector3();
+            thirdPersonCamera.getWorldDirection(cameraForward);
+            cameraForward.y = 0;
+            cameraForward.normalize();
+
+            const cameraRight = new THREE.Vector3();
+            cameraRight.crossVectors(cameraForward, new THREE.Vector3(0, 1, 0));
+
+            // Calculate movement based on input
+            if (keys.w) moveVector.add(cameraForward);
+            if (keys.s) moveVector.sub(cameraForward);
+            if (keys.a) moveVector.sub(cameraRight);
+            if (keys.d) moveVector.add(cameraRight);
+
+            // Vertical movement
+            if (keys.q) moveVector.y += 1;
+            if (keys.e) moveVector.y -= 1;
+
+            // Normalize movement vector if it exists
+            if (moveVector.length() > 0) {
+                moveVector.normalize();
+
+                // Apply acceleration
+                currentVelocity.x += moveVector.x * ACCELERATION;
+                currentVelocity.y += moveVector.y * ACCELERATION;
+                currentVelocity.z += moveVector.z * ACCELERATION;
+
+                // Set fish rotation based on movement direction
+                if (moveVector.x !== 0 || moveVector.z !== 0) {
+                    const targetRotation = Math.atan2(moveVector.x, moveVector.z);
+                    goldfish.rotation.y = targetRotation;
+                }
+            } else {
+                // If not moving, face away from camera
+                goldfish.rotation.y = mouseX + Math.PI;
+            }
+
+            // Apply deceleration
+            currentVelocity.multiplyScalar(DECELERATION);
+
+            // Clamp velocity to max speed
+            if (currentVelocity.length() > MAX_SPEED) {
+                currentVelocity.normalize();
+                currentVelocity.multiplyScalar(MAX_SPEED);
+            }
+
+            // Update position with velocity
+            const newPosition = goldfish.position.clone().add(currentVelocity);
+
+            // Clamp to bounds
+            newPosition.x = Math.max(SCENE_BOUNDS.minX, Math.min(SCENE_BOUNDS.maxX, newPosition.x));
+            newPosition.y = Math.max(SCENE_BOUNDS.minY, Math.min(SCENE_BOUNDS.maxY, newPosition.y));
+            newPosition.z = Math.max(SCENE_BOUNDS.minZ, Math.min(SCENE_BOUNDS.maxZ, newPosition.z));
+
+            goldfish.position.copy(newPosition);
+
+            // Camera follows fish from behind
+            const cameraOffset = new THREE.Vector3(
+                -Math.sin(mouseX) * 10,
+                2 + Math.sin(mouseY) * 5,
+                -Math.cos(mouseX) * 10
+            );
+
+            thirdPersonCamera.position.lerp(goldfish.position.clone().add(cameraOffset), 0.1);
+            thirdPersonCamera.lookAt(goldfish.position);
+
+            composer.passes[0].camera = thirdPersonCamera;
+        }
+
+        // Helper function to check if moving forward
+        function isMovingForward() {
+            return keys.w;
+        }
+
+        // Helper function to check if only moving backward
+        function isOnlyMovingBackward() {
+            return keys.s && !keys.w && !keys.a && !keys.d;
+        }
+
+        // Update shark following logic
+        function updateSharks() {
+            sharks.forEach((shark, i) => {
+                const time = Date.now() * 0.001;
+
+                // Simple wave-like movement pattern
+                shark.position.x += Math.sin(time + i) * 0.05;
+                shark.position.y += Math.cos(time + i * 0.5) * 0.03;
+
+                // Rotate shark based on movement direction
+                shark.rotation.y = Math.sin(time + i) * 0.2;
+
+                // Keep sharks within bounds
+                shark.position.x = Math.max(SCENE_BOUNDS.minX, Math.min(SCENE_BOUNDS.maxX, shark.position.x));
+                shark.position.y = Math.max(SCENE_BOUNDS.minY, Math.min(SCENE_BOUNDS.maxY, shark.position.y));
+                shark.position.z = Math.max(SCENE_BOUNDS.minZ, Math.min(SCENE_BOUNDS.maxZ, shark.position.z));
+            });
+        }
+
+        // Add function to update angler fish movement
+        function updateAnglerFish() {
+            const time = Date.now() * 0.001;
+            anglerFish.forEach((fish, i) => {
+                const { originalY, moveSpeed, phase } = fish.userData;
+
+                // Sinusoidal movement pattern
+                fish.position.y = originalY + Math.sin(time * moveSpeed + phase) * 1.5;
+                fish.position.x += Math.sin(time * moveSpeed * 0.5 + phase) * 0.02;
+                fish.rotation.y = Math.sin(time * moveSpeed + phase) * 0.2;
+
+                // Slight up/down tilt
+                fish.rotation.x = Math.sin(time * moveSpeed * 0.7 + phase) * 0.1;
+
+                // Keep within bounds
+                fish.position.x = Math.max(SCENE_BOUNDS.minX, Math.min(SCENE_BOUNDS.maxX, fish.position.x));
+                fish.position.y = Math.max(SCENE_BOUNDS.minY, Math.min(SCENE_BOUNDS.maxY, fish.position.y));
+                fish.position.z = Math.max(SCENE_BOUNDS.minZ, Math.min(SCENE_BOUNDS.maxZ, fish.position.z));
+            });
+        }
+
+        // Add new function to handle pixilate mode toggle
+        function togglePixilateMode() {
+            const threeJsScene = document.querySelector('canvas');
+            const pixelScene = document.querySelector('.pixel-scene') || createPixelScene();
+
+            if (threeJsScene.style.display !== 'none') {
+                // Switch to pixel art mode
+                threeJsScene.style.display = 'none';
+                pixelScene.style.display = 'block';
+            } else {
+                // Switch back to 3D mode
+                threeJsScene.style.display = 'block';
+                pixelScene.style.display = 'none';
+            }
+        }
+
+        function createPixelScene() {
+            const scene = document.createElement('div');
+            scene.className = 'pixel-scene';
+
+            // Add ground
+            const ground = document.createElement('div');
+            ground.className = 'pixel-ground';
+            scene.appendChild(ground);
+
+            // Add seaweed
+            for (let i = 0; i < 10; i++) {
+                const seaweed = document.createElement('div');
+                seaweed.className = 'pixel-seaweed';
+                seaweed.style.left = `${Math.random() * 90 + 5}%`;
+                seaweed.style.animationDelay = `${Math.random() * 2}s`;
+                scene.appendChild(seaweed);
+            }
+
+            // Add coral
+            for (let i = 0; i < 8; i++) {
+                const coral = document.createElement('div');
+                coral.className = 'pixel-coral';
+                coral.style.left = `${Math.random() * 90 + 5}%`;
+                scene.appendChild(coral);
+            }
+
+            // Create schools of fish
+            for (let s = 0; s < 3; s++) {
+                const schoolContainer = document.createElement('div');
+                schoolContainer.className = 'school-container';
+                schoolContainer.style.animationDelay = `${s * -10}s`;
+
+                // Add fish to the school
+                for (let i = 0; i < 8; i++) {
+                    const fish = document.createElement('div');
+                    fish.className = 'school-fish';
+                    fish.style.animationDelay = `${i * -2}s`;
+                    // Position fish in a circular pattern within the container
+                    const angle = (i / 8) * Math.PI * 2;
+                    fish.style.left = `${50 + Math.cos(angle) * 30}%`;
+                    fish.style.top = `${50 + Math.sin(angle) * 30}%`;
+                    schoolContainer.appendChild(fish);
+                }
+
+                scene.appendChild(schoolContainer);
+            }
+
+            // Add jellyfish
+            for (let i = 0; i < 5; i++) {
+                const jellyfish = document.createElement('div');
+                jellyfish.className = 'jellyfish';
+                jellyfish.style.left = `${Math.random() * 90 + 5}%`;
+                jellyfish.style.top = `${Math.random() * 40 + 30}%`;
+                jellyfish.style.animationDelay = `${i * -1.5}s`;
+                scene.appendChild(jellyfish);
+            }
+
+            // Add sharks with different animation delays
+            for (let i = 0; i < 3; i++) {
+                const shark = document.createElement('div');
+                shark.className = 'pixel-shark';
+                shark.style.top = `${Math.random() * 40 + 30}%`;
+                shark.style.animationDelay = `${Math.random() * -15}s`;
+                scene.appendChild(shark);
+            }
+
+            // Add small fish with figure-eight pattern
+            for (let i = 0; i < 10; i++) {
+                const fish = document.createElement('div');
+                fish.className = 'pixel-small-fish';
+                fish.style.top = `${Math.random() * 60 + 20}%`;
+                fish.style.left = `${Math.random() * 60 + 20}%`;
+                fish.style.animation = `figure-eight 15s linear infinite`;
+                fish.style.animationDelay = `${i * -1.5}s`;
+                scene.appendChild(fish);
+            }
+
+            // Add player fish (goldfish)
+            const player = document.createElement('div');
+            player.className = 'pixel-fish';
+            player.style.left = '50%';
+            player.style.top = '50%';
+            player.style.transform = 'translate(-50%, -50%)';
+            scene.appendChild(player);
+
+            // Add mouse movement for player fish
+            scene.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth) * 100;
+                const y = (e.clientY / window.innerHeight) * 100;
+                player.style.left = `${x}%`;
+                player.style.top = `${y}%`;
+                player.style.transform = `translate(-50%, -50%) scaleX(${e.movementX < 0 ? -1 : 1})`;
+            });
+
+            document.body.appendChild(scene);
+            return scene;
+        }
+
+        function toggleDemonMode() {
+            isDemonMode = !isDemonMode;
+
+            // Set background color but keep it semi-transparent to maintain visibility
+            scene.background = new THREE.Color(isDemonMode ? 0x220000 : 0x000033);
+
+            // Update colors of objects
+            scene.traverse((object) => {
+                if (object.material) {
+                    if (isDemonMode) {
+                        // Store original colors for restoration later
+                        object.userData.originalColor = object.material.color.getHex();
+                        object.userData.originalEmissive = object.material.emissive ? object.material.emissive.getHex() : 0x000000;
+                        object.userData.originalOpacity = object.material.opacity;
+
+                        // Determine object type and apply appropriate demon color
+                        let demonColor;
+                        if (object === goldfish) {
+                            demonColor = 0xff3333; // Bright red for player
+                        } else if (sharks.includes(object)) {
+                            demonColor = 0x990000; // Dark red for sharks
+                        } else if (smallFish.includes(object)) {
+                            demonColor = 0xcc0000; // Medium red for small fish
+                        } else if (bubbles.includes(object)) {
+                            demonColor = 0xff1111; // Light red for bubbles
+                            object.material.opacity = 0.4; // Keep bubbles visible
+                        } else if (seaweed.some(plant => plant.children.includes(object))) {
+                            demonColor = 0x660000; // Dark red for seaweed
+                        } else {
+                            // Default color for other objects (coral, ground, etc.)
+                            demonColor = 0x440000;
+                        }
+
+                        // Apply the demon color
+                        object.material.color.setHex(demonColor);
+
+                        // Add slight emissive glow to make objects more visible
+                        if (object.material.emissive) {
+                            object.material.emissive.setHex(demonColor);
+                            object.material.emissiveIntensity = 0.3;
+                        }
+
+                        // Ensure material is visible
+                        if (object.material.transparent) {
+                            object.material.opacity = Math.max(0.4, object.material.opacity);
+                        }
+                    } else {
+                        // Restore original colors and properties
+                        if (object.userData.originalColor !== undefined) {
+                            object.material.color.setHex(object.userData.originalColor);
+                        }
+                        if (object.material.emissive && object.userData.originalEmissive !== undefined) {
+                            object.material.emissive.setHex(object.userData.originalEmissive);
+                            object.material.emissiveIntensity = 0.5;
+                        }
+                        if (object.userData.originalOpacity !== undefined) {
+                            object.material.opacity = object.userData.originalOpacity;
+                        }
+                    }
+                }
+            });
+
+            // Adjust post-processing for better visibility
+            composer.passes.forEach(pass => {
+                if (pass instanceof UnrealBloomPass) {
+                    if (isDemonMode) {
+                        pass.strength = 1.5;
+                        pass.radius = 0.5;
+                        pass.threshold = 0.1;
+                    } else {
+                        pass.strength = 0.8;
+                        pass.radius = 0.3;
+                        pass.threshold = 0.2;
+                    }
+                }
+            });
+
+            // Update underwater effect shader
+            underwaterEffect.fragmentShader = `
+                uniform sampler2D tDiffuse;
+                uniform float time;
+                varying vec2 vUv;
+                void main() {
+                    vec2 uv = vUv;
+                    uv.x += sin(uv.y * 10.0 + time * 0.5) * 0.003;
+                    uv.y += cos(uv.x * 10.0 + time * 0.5) * 0.003;
+                    vec4 color = texture2D(tDiffuse, uv);
+                    if (${isDemonMode}) {
+                        // Enhance red channel and maintain visibility
+                        color.r = min(1.0, color.r * 1.3);
+                        color.g *= 0.7;
+                        color.b *= 0.7;
+                    }
+                    gl_FragColor = color;
+                }
+            `;
+        }
+
+        function updateDemonEffects() {
+            if (!isDemonMode) return;
+
+            const goldfishPosition = new THREE.Vector3();
+            goldfish.getWorldPosition(goldfishPosition);
+
+            // Make all fish chase the player
+            [...smallFish, ...sharks].forEach((fish) => {
+                const fishPosition = new THREE.Vector3();
+                fish.getWorldPosition(fishPosition);
+
+                // Calculate direction to player
+                const direction = new THREE.Vector3();
+                direction.subVectors(goldfishPosition, fishPosition);
+                direction.normalize();
+
+                // Move towards player with different speeds
+                const speed = sharks.includes(fish) ? 0.15 : 0.1;  // Sharks move faster
+                fish.position.add(direction.multiplyScalar(speed));
+
+                // Rotate to face player
+                const targetRotation = Math.atan2(direction.x, direction.z);
+                fish.rotation.y = targetRotation;
+
+                // Check for collision/eating
+                const distance = fishPosition.distanceTo(goldfishPosition);
+                if (distance < 1.5) {  // If fish gets too close
+                    // Game over - reset player position
+                    goldfish.position.set(0, 0, 0);
+                }
+
+                // Keep fish within bounds
+                fish.position.x = Math.max(SCENE_BOUNDS.minX, Math.min(SCENE_BOUNDS.maxX, fish.position.x));
+                fish.position.y = Math.max(SCENE_BOUNDS.minY, Math.min(SCENE_BOUNDS.maxY, fish.position.y));
+                fish.position.z = Math.max(SCENE_BOUNDS.minZ, Math.min(SCENE_BOUNDS.maxZ, fish.position.z));
+            });
+
+            // Keep seaweed movement minimal
+            seaweed.forEach((plant) => {
+                plant.children.forEach((segment) => {
+                    segment.position.x = Math.sin(Date.now() * 0.001) * 0.2;
+                });
+            });
+        }
+
+        // Add this after other global variables
+        let floatingText;
+
+        // Add this function after other creation functions
+        function createFloatingText() {
+            const loader = new FontLoader();
+            loader.load('https://unpkg.com/three@0.159.0/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+                const textGeometry = new TextGeometry('SANDCASTLES', {
+                    font: font,
+                    size: 2,
+                    height: 0.2,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 0.05,
+                    bevelSize: 0.02,
+                    bevelOffset: 0,
+                    bevelSegments: 5
+                });
+
+                textGeometry.center();
+
+                const textMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x66ffff,
+                    shininess: 100,
+                    emissive: 0x66ffff,
+                    emissiveIntensity: 0.3,
+                    transparent: true,
+                    opacity: 0.8
+                });
+
+                floatingText = new THREE.Mesh(textGeometry, textMaterial);
+                floatingText.position.set(0, 8, -5);  // Position it high up and back
+                floatingText.userData = {
+                    originalY: floatingText.position.y,
+                    phase: Math.random() * Math.PI * 2
+                };
+
+                scene.add(floatingText);
+            });
+        }
+
+        // Add this to the animate function, just before composer.render();
+        function updateFloatingText() {
+            if (floatingText) {
+                const time = Date.now() * 0.001;
+                floatingText.position.y = floatingText.userData.originalY + Math.sin(time * 0.5) * 0.5;
+                floatingText.rotation.y = Math.sin(time * 0.2) * 0.1;
+            }
+        }
+
+        // Start the scene
+        init();
+        animate();
+
+        // Add inactivity tracking
+        let inactivityTimer;
+        let lastActivityTime = Date.now();
+
+        function resetInactivityTimer() {
+            lastActivityTime = Date.now();
+            const viewButton = document.querySelector('.view-toggle');
+            if (viewButton) {
+                viewButton.style.animation = 'none';
+            }
+        }
+
+        function checkInactivity() {
+            const currentTime = Date.now();
+            const inactiveTime = currentTime - lastActivityTime;
+
+            if (inactiveTime > 10000) { // 10 seconds
+                const viewButton = document.querySelector('.view-toggle');
+                if (viewButton && !isThirdPerson) {
+                    viewButton.style.animation = 'flashBounce 2s infinite';
+                }
+            }
+        }
+
+        // Add event listeners for user activity
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('keydown', resetInactivityTimer);
+        document.addEventListener('click', resetInactivityTimer);
+
+        // Start checking for inactivity
+        setInterval(checkInactivity, 1000); // Check every second
+
+        // Remove the old timeout
+        // setTimeout(() => {
+        //     const viewButton = document.querySelector('.view-toggle');
+        //     if (viewButton) {
+        //         viewButton.style.animation = 'gentleFlash 2s infinite';
+        //     }
+        // }, 10000);
+    </script>
+</body>
+
+</html>
