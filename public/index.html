@@ -2286,12 +2286,20 @@
             // Animate angler fish
             updateAnglerFish();
 
+            // Define a buffer to prevent clipping through walls
+            const BOUNDARY_BUFFER = 1.5;
+
             // Animate small fish in schools
             smallFish.forEach((fish, i) => {
                 const time = Date.now() * 0.001;
                 fish.position.x += Math.sin(time + i) * 0.05;
                 fish.position.y += Math.cos(time + i * 0.5) * 0.03;
                 fish.rotation.y = Math.sin(time + i) * 0.2;
+
+                // Keep small fish within bounds with buffer
+                fish.position.x = Math.max(SCENE_BOUNDS.minX + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxX - BOUNDARY_BUFFER, fish.position.x));
+                fish.position.y = Math.max(SCENE_BOUNDS.minY + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxY - BOUNDARY_BUFFER, fish.position.y));
+                fish.position.z = Math.max(SCENE_BOUNDS.minZ + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxZ - BOUNDARY_BUFFER, fish.position.z));
             });
 
             // Animate bubbles
@@ -2374,6 +2382,9 @@
             const goldfishPosition = new THREE.Vector3();
             goldfish.getWorldPosition(goldfishPosition);
 
+            // Define a buffer to prevent clipping through walls
+            const BOUNDARY_BUFFER = 1.5;
+
             // Update small fish behavior
             smallFish.forEach(fish => {
                 const fishPosition = new THREE.Vector3();
@@ -2404,6 +2415,11 @@
                         )
                     );
                     fish.userData.escapeTime--;
+
+                    // Ensure fish stays within bounds with buffer
+                    fish.position.x = Math.max(SCENE_BOUNDS.minX + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxX - BOUNDARY_BUFFER, fish.position.x));
+                    fish.position.y = Math.max(SCENE_BOUNDS.minY + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxY - BOUNDARY_BUFFER, fish.position.y));
+                    fish.position.z = Math.max(SCENE_BOUNDS.minZ + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxZ - BOUNDARY_BUFFER, fish.position.z));
 
                     // Reset escape behavior after time
                     if (fish.userData.escapeTime <= 0) {
@@ -2453,6 +2469,11 @@
                             shark.userData.attackVector.clone().multiplyScalar(-0.05)
                         );
                     }
+
+                    // Ensure shark stays within bounds with buffer
+                    shark.position.x = Math.max(SCENE_BOUNDS.minX + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxX - BOUNDARY_BUFFER, shark.position.x));
+                    shark.position.y = Math.max(SCENE_BOUNDS.minY + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxY - BOUNDARY_BUFFER, shark.position.y));
+                    shark.position.z = Math.max(SCENE_BOUNDS.minZ + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxZ - BOUNDARY_BUFFER, shark.position.z));
 
                     shark.userData.attackTime--;
 
@@ -2868,10 +2889,13 @@
             // Update position with velocity
             const newPosition = goldfish.position.clone().add(currentVelocity);
 
-            // Clamp to bounds
-            newPosition.x = Math.max(SCENE_BOUNDS.minX, Math.min(SCENE_BOUNDS.maxX, newPosition.x));
-            newPosition.y = Math.max(SCENE_BOUNDS.minY, Math.min(SCENE_BOUNDS.maxY, newPosition.y));
-            newPosition.z = Math.max(SCENE_BOUNDS.minZ, Math.min(SCENE_BOUNDS.maxZ, newPosition.z));
+            // Define a buffer to prevent clipping through walls (approximately one goldfish length)
+            const BOUNDARY_BUFFER = 1.5;
+
+            // Clamp to bounds with buffer
+            newPosition.x = Math.max(SCENE_BOUNDS.minX + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxX - BOUNDARY_BUFFER, newPosition.x));
+            newPosition.y = Math.max(SCENE_BOUNDS.minY + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxY - BOUNDARY_BUFFER, newPosition.y));
+            newPosition.z = Math.max(SCENE_BOUNDS.minZ + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxZ - BOUNDARY_BUFFER, newPosition.z));
 
             goldfish.position.copy(newPosition);
 
@@ -2900,6 +2924,9 @@
 
         // Update shark following logic
         function updateSharks() {
+            // Define a buffer to prevent clipping through walls
+            const BOUNDARY_BUFFER = 1.5;
+
             sharks.forEach((shark, i) => {
                 const time = Date.now() * 0.001;
 
@@ -2910,15 +2937,18 @@
                 // Rotate shark based on movement direction
                 shark.rotation.y = Math.sin(time + i) * 0.2;
 
-                // Keep sharks within bounds
-                shark.position.x = Math.max(SCENE_BOUNDS.minX, Math.min(SCENE_BOUNDS.maxX, shark.position.x));
-                shark.position.y = Math.max(SCENE_BOUNDS.minY, Math.min(SCENE_BOUNDS.maxY, shark.position.y));
-                shark.position.z = Math.max(SCENE_BOUNDS.minZ, Math.min(SCENE_BOUNDS.maxZ, shark.position.z));
+                // Keep sharks within bounds with buffer
+                shark.position.x = Math.max(SCENE_BOUNDS.minX + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxX - BOUNDARY_BUFFER, shark.position.x));
+                shark.position.y = Math.max(SCENE_BOUNDS.minY + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxY - BOUNDARY_BUFFER, shark.position.y));
+                shark.position.z = Math.max(SCENE_BOUNDS.minZ + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxZ - BOUNDARY_BUFFER, shark.position.z));
             });
         }
 
         // Add function to update angler fish movement
         function updateAnglerFish() {
+            // Define a buffer to prevent clipping through walls
+            const BOUNDARY_BUFFER = 1.5;
+
             const time = Date.now() * 0.001;
             anglerFish.forEach((fish, i) => {
                 const { originalY, moveSpeed, phase } = fish.userData;
@@ -2931,10 +2961,10 @@
                 // Slight up/down tilt
                 fish.rotation.x = Math.sin(time * moveSpeed * 0.7 + phase) * 0.1;
 
-                // Keep within bounds
-                fish.position.x = Math.max(SCENE_BOUNDS.minX, Math.min(SCENE_BOUNDS.maxX, fish.position.x));
-                fish.position.y = Math.max(SCENE_BOUNDS.minY, Math.min(SCENE_BOUNDS.maxY, fish.position.y));
-                fish.position.z = Math.max(SCENE_BOUNDS.minZ, Math.min(SCENE_BOUNDS.maxZ, fish.position.z));
+                // Keep within bounds with buffer
+                fish.position.x = Math.max(SCENE_BOUNDS.minX + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxX - BOUNDARY_BUFFER, fish.position.x));
+                fish.position.y = Math.max(SCENE_BOUNDS.minY + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxY - BOUNDARY_BUFFER, fish.position.y));
+                fish.position.z = Math.max(SCENE_BOUNDS.minZ + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxZ - BOUNDARY_BUFFER, fish.position.z));
             });
         }
 
