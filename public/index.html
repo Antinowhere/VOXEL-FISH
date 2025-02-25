@@ -714,7 +714,7 @@
 <body>
     <div class="loading-overlay">
         <div class="loading-content">
-            <h1 class="loading-title">UNDERWATER VOXEL</h1>
+            <h1 class="loading-title">VOXEL SEA</h1>
             <div class="loading-message">Initializing aquatic experience...</div>
             <div class="loading-bar-container">
                 <div class="loading-bar"></div>
@@ -777,8 +777,8 @@
             { progress: 30, message: "Voxeling environment..." },
             { progress: 45, message: "Teaching sharks to be menacing..." },
             { progress: 60, message: "Generating underwater currents..." },
-            { progress: 75, message: "Applying fish physics..." },
-            { progress: 85, message: "Making bubbles bubbly..." },
+            { progress: 75, message: "Applying physics..." },
+            { progress: 85, message: "Making bubbles..." },
             { progress: 95, message: "Almost there..." },
             { progress: 100, message: "Ready to dive!" }
         ];
@@ -1000,7 +1000,7 @@
 
             // Setup bubble sound
             bubbleSound = new Audio('sounds/bubble.mp3');
-            bubbleSound.volume = 0.15;
+            bubbleSound.volume = 0.65;
 
             // Setup underwater ambience
             underwaterAmbience = new Audio('sounds/Underwater-Ambience.mp3');
@@ -1919,9 +1919,6 @@
             }
 
             updateGoldfishTail();
-
-            // Check for random bubble sound
-            checkRandomBubble();
 
             // Add smooth rotation interpolation
             const rotationDiff = targetRotation - currentRotation;
