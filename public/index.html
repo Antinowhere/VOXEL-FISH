@@ -165,6 +165,38 @@
             /* Center the buttons horizontally */
         }
 
+        /* Add color scroller styles */
+        .color-scroller {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 20px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: transform 0.3s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+
+        .color-option.active {
+            transform: scale(1.2);
+            box-shadow: 0 0 10px white;
+        }
+
         .demon-button {
             padding: 10px 20px;
             background: rgba(139, 0, 0, 0.7);
@@ -708,19 +740,146 @@
                 text-shadow: 0 0 20px rgba(102, 255, 255, 0.5);
             }
         }
+
+        /* Mobile Controls */
+        .mobile-controls {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            touch-action: none;
+        }
+
+        .d-pad {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .d-pad-button {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #333;
+            border-radius: 10px;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .d-pad-button:active,
+        .d-pad-button.active {
+            background: rgba(102, 255, 255, 0.8);
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .d-pad-up {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .d-pad-down {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .d-pad-left {
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .d-pad-right {
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Add new up/down buttons for Q and E */
+        .d-pad-up-alt {
+            top: 0;
+            right: -60px;
+            transform: none;
+        }
+
+        .d-pad-down-alt {
+            bottom: 0;
+            right: -60px;
+            transform: none;
+        }
+
+        .d-pad-up:active,
+        .d-pad-up.active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .d-pad-down:active,
+        .d-pad-down.active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .d-pad-left:active,
+        .d-pad-left.active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .d-pad-right:active,
+        .d-pad-right.active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .d-pad-up-alt:active,
+        .d-pad-up-alt.active,
+        .d-pad-down-alt:active,
+        .d-pad-down-alt.active {
+            transform: scale(0.95);
+        }
+
+        /* Media query for mobile devices */
+        @media (max-width: 768px) {
+            .mobile-controls {
+                display: block !important;
+            }
+
+            .controls-panel {
+                display: none !important;
+            }
+
+            .color-scroller {
+                bottom: 120px;
+                /* Move color scroller up to avoid overlap with D-pad */
+            }
+
+            .title-card {
+                bottom: 80px;
+                /* Move title card up to avoid overlap with D-pad */
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="loading-overlay">
         <div class="loading-content">
-            <h1 class="loading-title">VOXEL SEA</h1>
+            <h1 class="loading-title">voxelfish.com</h1>
             <div class="loading-message">Initializing aquatic experience...</div>
             <div class="loading-bar-container">
                 <div class="loading-bar"></div>
             </div>
             <div class="loading-credits">
-                <p>Created by Liam Mason</p>
+                <p>Willed into existence by Liam Mason</p>
                 <p>Built with Three.js</p>
                 <p>© 2025 All Rights Reserved</p>
             </div>
@@ -728,8 +887,16 @@
         </div>
     </div>
 
+    <div class="color-scroller">
+        <div class="color-option" style="background-color: #ff8800;" data-color="0xff8800"></div>
+        <div class="color-option" style="background-color: #66ccff;" data-color="0x66ccff"></div>
+        <div class="color-option" style="background-color: #ffaaff;" data-color="0xffaaff"></div>
+        <div class="color-option" style="background-color: #66ff99;" data-color="0x66ff99"></div>
+        <div class="color-option" style="background-color: #ffbbcc;" data-color="0xffbbcc"></div>
+    </div>
+
     <div class="title-card">
-        <h1>Fish - 3JS</h1>
+        <h1>Voxel Fish - 3JS</h1>
         <p>an app by Liam Mason © 2025</p>
     </div>
 
@@ -754,6 +921,17 @@
 
     </div>
 
+    <div class="mobile-controls">
+        <div class="d-pad">
+            <div class="d-pad-button d-pad-up">↑</div>
+            <div class="d-pad-button d-pad-down">↓</div>
+            <div class="d-pad-button d-pad-left">←</div>
+            <div class="d-pad-button d-pad-right">→</div>
+            <div class="d-pad-button d-pad-up-alt">Q</div>
+            <div class="d-pad-button d-pad-down-alt">E</div>
+        </div>
+    </div>
+
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
         {
@@ -765,6 +943,24 @@
     </script>
 
     <script type="module">
+        // Add window.onload event handler for mobile detection
+        window.addEventListener('load', function () {
+            // Check if mobile and force display mobile controls
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                console.log("Mobile device detected on load");
+                const mobileControls = document.querySelector('.mobile-controls');
+                const controlsPanel = document.querySelector('.controls-panel');
+                if (mobileControls) mobileControls.style.display = 'block';
+                if (controlsPanel) controlsPanel.style.display = 'none';
+            }
+
+            // Initialize color scroller visibility based on current mode
+            const colorScroller = document.querySelector('.color-scroller');
+            if (colorScroller) {
+                colorScroller.style.display = isThirdPerson ? 'none' : 'flex';
+            }
+        });
+
         // Loading Screen Logic
         const loadingBar = document.querySelector('.loading-bar');
         const initializeButton = document.querySelector('.initialize-button');
@@ -986,6 +1182,126 @@
             sharkTeeth: 0xffffff  // Keep white teeth
         };
 
+        // Mobile controls variables
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+
+        function setupMobileControls() {
+            console.log("Setting up mobile controls, isMobile:", isMobile);
+
+            // Force mobile controls to be visible on mobile devices
+            if (isMobile) {
+                document.querySelector('.mobile-controls').style.display = 'block';
+                document.querySelector('.controls-panel').style.display = 'none';
+            }
+
+            // D-pad touch controls
+            const dPadButtons = document.querySelectorAll('.d-pad-button');
+            dPadButtons.forEach(button => {
+                button.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleDPadPress(button.classList[1], true);
+                });
+
+                button.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    handleDPadPress(button.classList[1], false);
+                });
+            });
+
+            // Camera touch controls for the rest of the screen
+            document.addEventListener('touchstart', handleTouchStart);
+            document.addEventListener('touchmove', handleTouchMove);
+            document.addEventListener('touchend', handleTouchEnd);
+        }
+
+        function handleDPadPress(buttonClass, isPressed) {
+            // Find the button element
+            const button = document.querySelector(`.${buttonClass}`);
+
+            // Add or remove active class for visual feedback
+            if (isPressed) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+
+            switch (buttonClass) {
+                case 'd-pad-up':
+                    keys.w = isPressed;
+                    break;
+                case 'd-pad-down':
+                    keys.s = isPressed;
+                    break;
+                case 'd-pad-left':
+                    keys.a = isPressed;
+                    break;
+                case 'd-pad-right':
+                    keys.d = isPressed;
+                    break;
+                case 'd-pad-up-alt':
+                    keys.q = isPressed;
+                    break;
+                case 'd-pad-down-alt':
+                    keys.e = isPressed;
+                    break;
+            }
+        }
+
+        function handleTouchStart(e) {
+            const touch = e.touches[0];
+            // Ignore touches on the d-pad
+            if (touch.target.closest('.mobile-controls')) return;
+
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            lastTouchX = touchStartX;
+            lastTouchY = touchStartY;
+        }
+
+        function handleTouchMove(e) {
+            const touch = e.touches[0];
+            // Ignore touches on the d-pad
+            if (touch.target.closest('.mobile-controls')) return;
+
+            if (isThirdPerson) {
+                // Calculate touch movement delta
+                const deltaX = touch.clientX - lastTouchX;
+                const deltaY = touch.clientY - lastTouchY;
+
+                // Update camera angles
+                mouseX -= deltaX * 0.005;
+                mouseY = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, mouseY - deltaY * 0.005));
+
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+            } else {
+                // Side view touch controls
+                const mouseX = (touch.clientX / window.innerWidth) * 2 - 1;
+                const mouseY = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+                const vector = new THREE.Vector3(mouseX, mouseY, 0);
+                vector.unproject(camera);
+                const dir = vector.sub(camera.position).normalize();
+                const distance = -camera.position.z / dir.z;
+                const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+
+                goldfish.position.x = pos.x * 1.2;
+                goldfish.position.y = pos.y * 1.2;
+            }
+        }
+
+        function handleTouchEnd() {
+            // Reset touch tracking variables
+            touchStartX = 0;
+            touchStartY = 0;
+            lastTouchX = 0;
+            lastTouchY = 0;
+        }
+
         // Add audio setup
         let audioContext;
         let audioElement;
@@ -1113,10 +1429,51 @@
             const viewButton = document.querySelector('.view-toggle');
             viewButton.addEventListener('click', toggleView);
 
+            // Setup mobile controls - always call this regardless of device detection
+            setupMobileControls();
+
             // Add setupAudio to init
             setupAudio();
 
             createFloatingText();
+
+            setupColorScroller();
+        }
+
+        // Add color scroller functionality
+        function setupColorScroller() {
+            const colorOptions = document.querySelectorAll('.color-option');
+            colorOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Remove active class from all options
+                    colorOptions.forEach(opt => opt.classList.remove('active'));
+                    // Add active class to clicked option
+                    option.classList.add('active');
+
+                    // Get the color value
+                    const color = parseInt(option.dataset.color);
+
+                    // Update goldfish color, excluding eyes and eye highlights
+                    goldfish.traverse((child) => {
+                        if (child.material) {
+                            // Check if this is an eye or eye highlight
+                            const isEye = child.material.color.getHex() === COLORS.eye;
+                            const isEyeShine = child.material.color.getHex() === COLORS.eyeShine;
+
+                            // Only update color if not an eye component
+                            if (!isEye && !isEyeShine) {
+                                child.material.color.setHex(color);
+                                if (child.material.emissive) {
+                                    child.material.emissive.setHex(color);
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Set initial active color
+            colorOptions[0].classList.add('active');
         }
 
         function setupPostProcessing() {
@@ -1343,15 +1700,8 @@
                 const leftEyeMain = createVoxelModel(COLORS.sharkEye, 0.4, true);
                 const rightEyeMain = createVoxelModel(COLORS.sharkEye, 0.4, true);
 
-                // Brighter eye shine
-                const leftEyeShine = createVoxelModel(COLORS.eyeShine, 0.2);
-                const rightEyeShine = createVoxelModel(COLORS.eyeShine, 0.2);
-
-                leftEyeShine.position.set(0.2, 0.1, 0.1);  // Moved forward
-                rightEyeShine.position.set(0.2, 0.1, 0.1);  // Moved forward
-
-                leftEye.add(leftEyeMain, leftEyeShine);
-                rightEye.add(rightEyeMain, rightEyeShine);
+                leftEye.add(leftEyeMain);
+                rightEye.add(rightEyeMain);
 
                 // Adjusted eye positions to be more forward
                 leftEye.position.set(1.2, 0.3, 1.0);
@@ -2290,13 +2640,19 @@
             const controlsBox = document.querySelector('.controls-box');
             const real2dButton = document.querySelector('.real2d-toggle');
             const controlsPanel = document.querySelector('.controls-panel');
+            const colorScroller = document.querySelector('.color-scroller');
 
             if (isThirdPerson) {
                 setupThirdPersonMode();
-                if (button) button.textContent = 'Return to Cursor Mode';
+                if (button) {
+                    button.textContent = 'Return to Cursor Mode';
+                    // Stop the button from flashing when in third person mode
+                    button.style.animation = 'none';
+                }
                 if (controlsBox) controlsBox.style.display = 'block';
                 if (real2dButton) real2dButton.style.display = 'none';
-                if (controlsPanel) controlsPanel.style.display = 'block';
+                if (controlsPanel && !isMobile) controlsPanel.style.display = 'block';
+                if (colorScroller) colorScroller.style.display = 'none'; // Hide color scroller in third person mode
             } else {
                 cleanupThirdPersonMode();
                 // Reset goldfish position and rotation when returning to cursor mode
@@ -2304,10 +2660,17 @@
                     goldfish.position.set(0, 0, 0);
                     goldfish.rotation.set(0, 0, 0);
                 }
-                if (button) button.textContent = 'Switch to Third Person';
+                if (button) {
+                    button.textContent = 'Switch to Third Person';
+                    // If button was flashing before, resume flashing
+                    if (buttonFlashStarted) {
+                        button.style.animation = 'flashBounce 2s infinite';
+                    }
+                }
                 if (controlsBox) controlsBox.style.display = 'none';
                 if (real2dButton) real2dButton.style.display = 'block';
-                if (controlsPanel) controlsPanel.style.display = 'none';
+                if (controlsPanel && !isMobile) controlsPanel.style.display = 'none';
+                if (colorScroller) colorScroller.style.display = 'flex'; // Show color scroller in cursor mode
             }
         }
 
@@ -2475,10 +2838,10 @@
             if (moveVector.length() > 0) {
                 moveVector.normalize();
 
-                // Apply acceleration
-                currentVelocity.x += moveVector.x * ACCELERATION;
-                currentVelocity.y += moveVector.y * ACCELERATION;
-                currentVelocity.z += moveVector.z * ACCELERATION;
+                // Apply acceleration with increased speed (1.5x faster)
+                currentVelocity.x += moveVector.x * ACCELERATION * 1.5;
+                currentVelocity.y += moveVector.y * ACCELERATION * 1.5;
+                currentVelocity.z += moveVector.z * ACCELERATION * 1.5;
 
                 // Set fish rotation based on movement direction
                 if (moveVector.x !== 0 || moveVector.z !== 0) {
@@ -2493,10 +2856,13 @@
             // Apply deceleration
             currentVelocity.multiplyScalar(DECELERATION);
 
-            // Clamp velocity to max speed
-            if (currentVelocity.length() > MAX_SPEED) {
+            // Increase max speed by 1.5x
+            const INCREASED_MAX_SPEED = MAX_SPEED * 1.5;
+
+            // Clamp velocity to increased max speed
+            if (currentVelocity.length() > INCREASED_MAX_SPEED) {
                 currentVelocity.normalize();
-                currentVelocity.multiplyScalar(MAX_SPEED);
+                currentVelocity.multiplyScalar(INCREASED_MAX_SPEED);
             }
 
             // Update position with velocity
@@ -2836,7 +3202,7 @@
         function createFloatingText() {
             const loader = new FontLoader();
             loader.load('https://unpkg.com/three@0.159.0/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-                const textGeometry = new TextGeometry('SANDCASTLES', {
+                const textGeometry = new TextGeometry('voxelfish.com', {
                     font: font,
                     size: 2,
                     height: 0.2,
@@ -2870,7 +3236,6 @@
             });
         }
 
-        // Add this to the animate function, just before composer.render();
         function updateFloatingText() {
             if (floatingText) {
                 const time = Date.now() * 0.001;
@@ -2886,23 +3251,37 @@
         // Add inactivity tracking
         let inactivityTimer;
         let lastActivityTime = Date.now();
+        let buttonFlashStarted = false;
+        let initTime = Date.now(); // Track when the page was initialized
 
         function resetInactivityTimer() {
             lastActivityTime = Date.now();
-            const viewButton = document.querySelector('.view-toggle');
-            if (viewButton) {
-                viewButton.style.animation = 'none';
+            // Don't reset the animation if it's already started
+            if (!buttonFlashStarted) {
+                const viewButton = document.querySelector('.view-toggle');
+                if (viewButton) {
+                    viewButton.style.animation = 'none';
+                }
             }
         }
 
         function checkInactivity() {
             const currentTime = Date.now();
-            const inactiveTime = currentTime - lastActivityTime;
+            const viewButton = document.querySelector('.view-toggle');
 
-            if (inactiveTime > 10000) { // 10 seconds
-                const viewButton = document.querySelector('.view-toggle');
-                if (viewButton && !isThirdPerson) {
-                    viewButton.style.animation = 'flashBounce 2s infinite';
+            // Only flash the button if we're in cursor mode (not third person)
+            if (!isThirdPerson) {
+                // Start flashing after 10 seconds regardless of activity
+                if (!buttonFlashStarted && currentTime - initTime > 10000) {
+                    if (viewButton) {
+                        viewButton.style.animation = 'flashBounce 2s infinite';
+                        buttonFlashStarted = true;
+                    }
+                }
+            } else {
+                // If we're in third person mode, make sure the button is not flashing
+                if (viewButton) {
+                    viewButton.style.animation = 'none';
                 }
             }
         }
@@ -2914,14 +3293,6 @@
 
         // Start checking for inactivity
         setInterval(checkInactivity, 1000); // Check every second
-
-        // Remove the old timeout
-        // setTimeout(() => {
-        //     const viewButton = document.querySelector('.view-toggle');
-        //     if (viewButton) {
-        //         viewButton.style.animation = 'gentleFlash 2s infinite';
-        //     }
-        // }, 10000);
     </script>
 </body>
 
