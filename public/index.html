@@ -936,8 +936,8 @@
     <script type="importmap">
         {
             "imports": {
-                "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+                "three": "https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.159.0/examples/jsm/"
             }
         }
     </script>
@@ -2835,9 +2835,10 @@
         // Improve third person camera following in updateThirdPersonMovement
         function updateThirdPersonMovement() {
             const moveVector = new THREE.Vector3();
+            //how much of up, how much of right and how much of forward, XYZ!!!!! - [ANDREW TIP] 
 
             // Get camera's forward and right vectors (flattened to xz plane)
-            const cameraForward = new THREE.Vector3();
+            const cameraForward = new THREE.Vector3(); // makes a new vector , sets it to 0,0,0  - a vector is a coordinate [ANDREW TIP] 
             thirdPersonCamera.getWorldDirection(cameraForward);
             cameraForward.y = 0;
             cameraForward.normalize();
@@ -2966,22 +2967,6 @@
                 fish.position.y = Math.max(SCENE_BOUNDS.minY + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxY - BOUNDARY_BUFFER, fish.position.y));
                 fish.position.z = Math.max(SCENE_BOUNDS.minZ + BOUNDARY_BUFFER, Math.min(SCENE_BOUNDS.maxZ - BOUNDARY_BUFFER, fish.position.z));
             });
-        }
-
-        // Add new function to handle pixilate mode toggle
-        function togglePixilateMode() {
-            const threeJsScene = document.querySelector('canvas');
-            const pixelScene = document.querySelector('.pixel-scene') || createPixelScene();
-
-            if (threeJsScene.style.display !== 'none') {
-                // Switch to pixel art mode
-                threeJsScene.style.display = 'none';
-                pixelScene.style.display = 'block';
-            } else {
-                // Switch back to 3D mode
-                threeJsScene.style.display = 'block';
-                pixelScene.style.display = 'none';
-            }
         }
 
         function createPixelScene() {
@@ -3231,7 +3216,7 @@
         // Add this function after other creation functions
         function createFloatingText() {
             const loader = new FontLoader();
-            loader.load('https://unpkg.com/three@0.159.0/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            loader.load('https://cdn.jsdelivr.net/npm/three@0.159.0/examples/fonts/helvetiker_regular.typeface.json', function (font) {
                 const textGeometry = new TextGeometry('voxelfish.com', {
                     font: font,
                     size: 2,
